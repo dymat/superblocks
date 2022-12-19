@@ -1,0 +1,14 @@
+#Conda packages installations
+#conda config --prepend channels conda-forge
+
+geopandas==0.11
+networkx
+shapely==1.8.2
+rtree
+requests
+progress
+haversine
+rasterio
+pyyaml
+matplotlib
+scipy

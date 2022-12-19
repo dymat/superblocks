@@ -1,0 +1,24 @@
+version: '3'
+services:
+  overpass:
+    image: wiktorn/overpass-api:0.7.56.4
+    environment:
+      OVERPASS_META: yes
+      OVERPASS_MODE: init
+      OVERPASS_PLANET_URL: http://download.geofabrik.de/europe/germany/berlin-latest.osm.bz2
+      #OVERPASS_DIFF_URL: http://download.openstreetmap.fr/replication/europe/monaco/minute/
+      OVERPASS_RULES_LOAD: 10
+    volumes:
+      - overpass_db:/db
+    restart: unless-stopped
+    ports:
+      - 127.0.0.1:12345:80
+
+  superblock:
+    build: superblock_finder
+    volumes:
+      - ./data:/data
+      - ./superblock_finder/superblock.py:/superblock.py:ro
+
+volumes:
+  overpass_db:
