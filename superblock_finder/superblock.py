@@ -145,6 +145,9 @@ for city in cities:
         # ==============================================================================
         # Create Street Graph
         # ==============================================================================
+        # TODO:
+        #   (1) get BBox
+        #   (2) get intersecting roads, buildings,
         gdf_roads = gpd.read_file(os.path.join(path_in, initial_street_name))
 
         # Remove Z attribute if it has z geometry
