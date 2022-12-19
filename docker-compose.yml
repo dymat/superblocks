@@ -19,6 +19,15 @@ services:
     volumes:
       - ./data:/data
       - ./superblock_finder/superblock.py:/superblock.py:ro
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+
+  postgis:
+    image: postgis/postgis:15-3.3-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
 
 volumes:
   overpass_db:
