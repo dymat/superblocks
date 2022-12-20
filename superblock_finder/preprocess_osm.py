@@ -13,10 +13,13 @@ import geopandas as gpd
 import networkx as nx
 from shapely.geometry import Point
 
+from sqlalchemy import create_engine
+
 from superblocks.scripts.network import helper_osm as hp_osm
 from superblocks.scripts.network import helper_network as hp_net
 from superblocks.scripts.network import helper_read_write as hp_rw
 from superblocks.scripts.population import population_extraction as pe
+
 
 # WSG UTM ZONES: http://www.dmap.co.uk/utmworld.htm
 # 4326: WSG 84   
@@ -27,7 +30,6 @@ from superblocks.scripts.population import population_extraction as pe
 crs_pop_fb = 4326
 crs_bb = 4326
 crs_overpass = 4326
-to_crs_meter_switzerland = 32632 # Target projection
 
 path_temp = "/data/tmp"
 path_out = "/data/cities"
@@ -42,10 +44,10 @@ calculate_pop_density = True
 hp_rw.create_folder(path_out)
 
 # Window selection
-length_in_m = 2000  # [m]
+length_in_m = 500  # [m]
 radius_pop_density = 100  # [m]
 radius_GFA_density = 100 # [m]
-sleep_time = 50
+sleep_time = 3
 crit_bus_is_big_street = False
 swiss_community = False
 
@@ -75,6 +77,13 @@ case_studies = [
     #'munchen'
 ]
 
+
+postgis_connection = create_engine(f"postgresql://{os.getenv('POSTGRES_USER', 'postgres')}:" \
+                     f"{os.getenv('POSTGRES_PASSWORD', 'postgres')}" \
+                     f"@{os.getenv('POSTGRES_HOST', 'localhost')}:5432/{os.getenv('POSTGRES_DATABASE', 'postgres')}")
+if not postgis_connection:
+    sys.exit(0)
+
 for city in case_studies:
     path_out_city = os.path.join(path_out, str(city))
     city_metadata = hp_rw.city_metadata(city, path_pop_data=path_pop_data)
@@ -99,7 +108,12 @@ for city in case_studies:
             xmax=centroid_to_crs_meter.geometry.x[0] + length_in_m / 2,
             xmin=centroid_to_crs_meter.geometry.x[0] - length_in_m / 2)
 
+
         bb_gdf = bb.as_gdf(crs_orig=to_crs_meter)
+
+        # bb to postgis
+        bb_gdf.to_postgis("bbox", postgis_connection, if_exists="replace")
+
         bb_gdf.to_file(os.path.join(path_out_city, "extent.shp"))
         bb_osm = bb_gdf.to_crs("epsg:{}".format(crs_bb))
         bb = hp_osm.BB(
@@ -127,185 +141,225 @@ for city in case_studies:
         bb_geom = list(bb_gdf.geometry)[0]
 
         # Check if streets were downloaded and thus all geomeetries:
-        if not os.path.exists(path_complete_streets_edges) or write_anyway:
+        #if not os.path.exists(path_complete_streets_edges) or write_anyway:
 
-            # Download buildings
-            if not os.path.exists(path_buildings) or write_anyway:
-                time.sleep(sleep_time)
-                osm_gdf = hp_osm.overpass_osm(bb=bb, to_crs=to_crs_meter, extraction_type='buildings')
-                if osm_gdf.shape[0] > 0:
-                    osm_gdf = hp_net.clip_outer_polygons(osm_gdf, bb_geom)
+        # Download buildings
+        #if not os.path.exists(path_buildings) or write_anyway:
+        time.sleep(sleep_time)
+        osm_buildings_gdf = hp_osm.overpass_osm(bb=bb, to_crs=to_crs_meter, extraction_type='buildings')
+        if osm_buildings_gdf.shape[0] > 0:
+            osm_buildings_gdf = hp_net.clip_outer_polygons(osm_buildings_gdf, bb_geom)
 
-                    # Remove invalid polygons
-                    osm_gdf = hp_osm.remove_faulty_polygons(osm_gdf)
-                    osm_gdf.to_file(path_buildings)
+            # Remove invalid polygons
+            osm_buildings_gdf = hp_osm.remove_faulty_polygons(osm_buildings_gdf)
 
-            # Download water
-            if not os.path.exists(path_water) or write_anyway:
-                osm_gdf = hp_osm.overpass_osm(bb=bb, to_crs=to_crs_meter, extraction_type='water')
-                if osm_gdf.shape[0] > 0:
-                    osm_gdf = hp_net.clip_outer_polygons(osm_gdf, bb_geom)
-                    if osm_gdf.shape[0] > 0:
-                        osm_gdf = hp_net.gdf_multilinestring_to_linestring(osm_gdf)
-                        osm_gdf.to_file(path_water)
+            # TODO: buildings to postgis
+            # bb to postgis
+            osm_buildings_gdf.to_postgis("buildings", postgis_connection, if_exists="replace")
+            #osm_gdf.to_file(path_buildings)
 
-            # Download bus
-            if not os.path.exists(path_bus) or write_anyway:
-                time.sleep(sleep_time)
-                osm_gdf = hp_osm.overpass_osm(bb=bb, to_crs=to_crs_meter, extraction_type='bus')
-                if osm_gdf.shape[0] > 0:
-                    osm_gdf = hp_net.clip_outer_polygons(osm_gdf, bb_geom)
-                    if osm_gdf.shape[0] > 0:
-                        osm_gdf = hp_net.gdf_multilinestring_to_linestring(osm_gdf)
-                        osm_gdf.to_file(path_bus)
+        # Download water
+        #if not os.path.exists(path_water) or write_anyway:
+        osm_water_gdf = hp_osm.overpass_osm(bb=bb, to_crs=to_crs_meter, extraction_type='water')
+        if osm_water_gdf.shape[0] > 0:
+            osm_water_gdf = hp_net.clip_outer_polygons(osm_water_gdf, bb_geom)
+            if osm_water_gdf.shape[0] > 0:
+                osm_water_gdf = hp_net.gdf_multilinestring_to_linestring(osm_water_gdf)
 
-            # Download bridges
-            if not os.path.exists(path_bridges) or write_anyway:
-                time.sleep(sleep_time)
-                osm_gdf = hp_osm.overpass_osm(bb=bb, to_crs=to_crs_meter, extraction_type='bridges')
-                if osm_gdf.shape[0] > 0:
-                    osm_gdf = hp_net.clip_outer_polygons(osm_gdf, bb_geom)
-                    if osm_gdf.shape[0] > 0:
-                        osm_gdf.to_file(path_bridges)
+                # TODO: water to postgis
+                osm_water_gdf.to_postgis("water", postgis_connection, if_exists="replace")
+                #osm_water_gdf.to_file(path_water)
 
-            # Download land use
-            if not os.path.exists(path_landuse) or write_anyway:
-                time.sleep(sleep_time)
-                osm_gdf = hp_osm.overpass_osm(bb=bb, to_crs=to_crs_meter, extraction_type='landuse')
-                if osm_gdf.shape[0] > 0:
-                    osm_gdf = hp_net.clip_outer_polygons(osm_gdf, bb_geom)
-                    if osm_gdf.shape[0] > 0:
-                        osm_gdf.to_file(path_landuse)
-            
-            # Download tram
-            if not os.path.exists(path_tram) or write_anyway:
-                time.sleep(sleep_time)
-                osm_gdf = hp_osm.overpass_osm(bb=bb, to_crs=to_crs_meter, extraction_type='tram')
-                if osm_gdf.shape[0] > 0:
-                    osm_gdf = hp_net.gdf_multilinestring_to_linestring(osm_gdf)
-                    osm_gdf = hp_net.clip_outer_polygons(osm_gdf, bb_geom)
-                    if osm_gdf.shape[0] > 0:
-                        osm_gdf.to_file(path_tram)
+        # Download bus
+        #if not os.path.exists(path_bus) or write_anyway:
+        time.sleep(sleep_time)
+        osm_bus_gdf = hp_osm.overpass_osm(bb=bb, to_crs=to_crs_meter, extraction_type='bus')
+        if osm_bus_gdf.shape[0] > 0:
+            osm_bus_gdf = hp_net.clip_outer_polygons(osm_bus_gdf, bb_geom)
+            if osm_bus_gdf.shape[0] > 0:
+                osm_bus_gdf = hp_net.gdf_multilinestring_to_linestring(osm_bus_gdf)
 
-            # Download bus
-            if not os.path.exists(path_trolleybus) or write_anyway:
-                time.sleep(sleep_time)
-                osm_gdf = hp_osm.overpass_osm(bb=bb, to_crs=to_crs_meter, extraction_type='trolleybus')
-                if osm_gdf.shape[0] > 0:
-                    osm_gdf = hp_net.gdf_multilinestring_to_linestring(osm_gdf)
-                    osm_gdf = hp_net.clip_outer_polygons(osm_gdf, bb_geom)
-                    if osm_gdf.shape[0] > 0:
-                        osm_gdf.to_file(path_trolleybus)
+                # TODO: bus to postgis
+                osm_bus_gdf.to_postgis("bus", postgis_connection, if_exists="replace")
+                #osm_bus_gdf.to_file(path_bus)
+
+        # Download bridges
+        #if not os.path.exists(path_bridges) or write_anyway:
+        time.sleep(sleep_time)
+        osm_bridges_gdf = hp_osm.overpass_osm(bb=bb, to_crs=to_crs_meter, extraction_type='bridges')
+        if osm_bridges_gdf.shape[0] > 0:
+            osm_bridges_gdf = hp_net.clip_outer_polygons(osm_bridges_gdf, bb_geom)
+            if osm_bridges_gdf.shape[0] > 0:
+
+                # TODO: bridges to postgis
+                osm_bridges_gdf.to_postgis("bridges", postgis_connection, if_exists="replace")
+                #osm_bridges_gdf.to_file(path_bridges)
+
+        # Download land use
+        #if not os.path.exists(path_landuse) or write_anyway:
+        time.sleep(sleep_time)
+        osm_landuse_gdf = hp_osm.overpass_osm(bb=bb, to_crs=to_crs_meter, extraction_type='landuse')
+        if osm_landuse_gdf.shape[0] > 0:
+            osm_landuse_gdf = hp_net.clip_outer_polygons(osm_landuse_gdf, bb_geom)
+            if osm_landuse_gdf.shape[0] > 0:
+
+                # TODO: landuse to postgis
+                osm_landuse_gdf.to_postgis("landuse", postgis_connection, if_exists="replace")
+                #osm_landuse_gdf.to_file(path_landuse)
+
+        # Download tram
+        #if not os.path.exists(path_tram) or write_anyway:
+        time.sleep(sleep_time)
+        osm_tram_gdf = hp_osm.overpass_osm(bb=bb, to_crs=to_crs_meter, extraction_type='tram')
+        if osm_tram_gdf.shape[0] > 0:
+            osm_tram_gdf = hp_net.gdf_multilinestring_to_linestring(osm_tram_gdf)
+            osm_tram_gdf = hp_net.clip_outer_polygons(osm_tram_gdf, bb_geom)
+            if osm_tram_gdf.shape[0] > 0:
+
+                # TODO: tram to postgis
+                osm_tram_gdf.to_postgis("tram", postgis_connection, if_exists="replace")
+                #osm_tram_gdf.to_file(path_tram)
+
+        # Download bus
+        #if not os.path.exists(path_trolleybus) or write_anyway:
+        time.sleep(sleep_time)
+        osm_trolleybus_gdf = hp_osm.overpass_osm(bb=bb, to_crs=to_crs_meter, extraction_type='trolleybus')
+        if osm_trolleybus_gdf.shape[0] > 0:
+            osm_trolleybus_gdf = hp_net.gdf_multilinestring_to_linestring(osm_trolleybus_gdf)
+            osm_trolleybus_gdf = hp_net.clip_outer_polygons(osm_trolleybus_gdf, bb_geom)
+            if osm_trolleybus_gdf.shape[0] > 0:
+
+                # TODO: trolleybus to postgis
+                osm_trolleybus_gdf.to_postgis("trolleybus", postgis_connection, if_exists="replace")
+                osm_trolleybus_gdf.to_file(path_trolleybus)
   
-            # Download streets
-            if not os.path.exists(path_streets_edges) or write_anyway:
-                time.sleep(sleep_time)
-                osm_gdf = hp_osm.overpass_osm(bb=bb, to_crs=to_crs_meter, extraction_type='streets')
+        # Download streets
+        #if not os.path.exists(path_streets_edges) or write_anyway:
+        time.sleep(sleep_time)
+        osm_streets_gdf = hp_osm.overpass_osm(bb=bb, to_crs=to_crs_meter, extraction_type='streets')
 
-                if osm_gdf.shape[0] > 0:
-                    osm_gdf = hp_net.gdf_multilinestring_to_linestring(osm_gdf)  # Multiline gdf to singline gdf
-                    osm_gdf = hp_net.clip_outer_polygons(osm_gdf, bb_geom)
-                    osm_gdf = hp_net.remove_all_intersections(osm_gdf) # remove all intersections (lines which overlap)
-                    osm_gdf = hp_net.remove_rings(osm_gdf)
-                    G = hp_rw.gdf_to_nx(osm_gdf)
-                    G_simple = hp_net.simplify_network(
-                        G, crit_big_roads=False, crit_bus_is_big_street=crit_bus_is_big_street)
+        if osm_streets_gdf.shape[0] > 0:
+            osm_streets_gdf = hp_net.gdf_multilinestring_to_linestring(osm_streets_gdf)  # Multiline gdf to singline gdf
+            osm_streets_gdf = hp_net.clip_outer_polygons(osm_streets_gdf, bb_geom)
+            osm_streets_gdf = hp_net.remove_all_intersections(osm_streets_gdf) # remove all intersections (lines which overlap)
+            osm_streets_gdf = hp_net.remove_rings(osm_streets_gdf)
+            G = hp_rw.gdf_to_nx(osm_streets_gdf)
+            G_simple = hp_net.simplify_network(
+                G, crit_big_roads=False, crit_bus_is_big_street=crit_bus_is_big_street)
 
-                    nodes, edges = hp_rw.nx_to_gdf(G_simple)
-                    nodes.to_file(path_streets_nodes)
-                    edges.to_file(path_streets_edges)
+            # TODO: street network (Nodes + Edges to postgis)
+            nodes, edges = hp_rw.nx_to_gdf(G_simple)
+            #nodes.to_file(path_streets_nodes)
+            #edges.to_file(path_streets_edges)
 
-                print("downloaded simple street: {}".format(city))
+            nodes.to_postgis("street_network_nodes", postgis_connection, if_exists="replace")
+            edges.to_postgis("street_network_edges", postgis_connection, if_exists="replace")
 
-            # Download complete street network
-            '''if not os.path.exists(path_complete_streets_edges) or write_anyway:
-                time.sleep(sleep_time)
-                osm_gdf = hp_osm.overpass_osm(bb=bb, to_crs=to_crs_meter, extraction_type='all_streets')
+        print("downloaded simple street: {}".format(city))
 
-                if osm_gdf.shape[0] > 0:
-                    #osm_gdf.to_file(os.path.join(path_out_city, 'street_raw.shp'))
-                    #osm_gdf = gpd.read_file(os.path.join(path_out_city, 'street_raw.shp'))
-                    osm_gdf = hp_net.gdf_multilinestring_to_linestring(osm_gdf)  # Multiline gdf to singline gdf
+        # Download complete street network
+        '''if not os.path.exists(path_complete_streets_edges) or write_anyway:
+            time.sleep(sleep_time)
+            osm_gdf = hp_osm.overpass_osm(bb=bb, to_crs=to_crs_meter, extraction_type='all_streets')
 
-                    # Clip
-                    osm_gdf = hp_net.clip_outer_polygons(osm_gdf, bb_geom)
+            if osm_gdf.shape[0] > 0:
+                #osm_gdf.to_file(os.path.join(path_out_city, 'street_raw.shp'))
+                #osm_gdf = gpd.read_file(os.path.join(path_out_city, 'street_raw.shp'))
+                osm_gdf = hp_net.gdf_multilinestring_to_linestring(osm_gdf)  # Multiline gdf to singline gdf
 
-                    # remove all intersections (lines which overlopa)
-                    osm_gdf = hp_net.remove_all_intersections(osm_gdf)
+                # Clip
+                osm_gdf = hp_net.clip_outer_polygons(osm_gdf, bb_geom)
 
-                    # Remove rings
-                    osm_gdf = hp_net.remove_rings(osm_gdf)
+                # remove all intersections (lines which overlopa)
+                osm_gdf = hp_net.remove_all_intersections(osm_gdf)
 
-                    G = hp_rw.gdf_to_nx(osm_gdf)
-                    G_simple = hp_net.simplify_network(G, crit_big_roads=False, crit_bus_is_big_street=crit_bus_is_big_street)
+                # Remove rings
+                osm_gdf = hp_net.remove_rings(osm_gdf)
 
-                    nodes, edges = hp_rw.nx_to_gdf(G_simple)
-                    nodes.to_file(path_complete_streets_nodes)
-                    edges.to_file(path_complete_streets_edges)'''
+                G = hp_rw.gdf_to_nx(osm_gdf)
+                G_simple = hp_net.simplify_network(G, crit_big_roads=False, crit_bus_is_big_street=crit_bus_is_big_street)
+
+                nodes, edges = hp_rw.nx_to_gdf(G_simple)
+                nodes.to_file(path_complete_streets_nodes)
+                edges.to_file(path_complete_streets_edges)'''
 
         print("... downloaded data {}".format(city))
 
     if assign_attributes_to_graph:
 
-        if not os.path.exists(os.path.join(path_out_city, 'street_network_edges_with_attributes.shp')) or write_anyway:
-            # ==============================================================================
-            # Assign  attributes from one graph to another graph
-            # ==============================================================================
-            path_tram = os.path.join(path_out_city, "tram.shp")
-            path_bus = os.path.join(path_out_city, "bus.shp")
-            path_street = os.path.join(path_out_city, "street_network_edges.shp")
-            path_trolleybus = os.path.join(path_out_city, "trolleybus.shp")
+        #if not os.path.exists(os.path.join(path_out_city, 'street_network_edges_with_attributes.shp')) or write_anyway:
+        # ==============================================================================
+        # Assign  attributes from one graph to another graph
+        # ==============================================================================
+        #path_tram = os.path.join(path_out_city, "tram.shp")
+        #path_bus = os.path.join(path_out_city, "bus.shp")
+        #path_street = os.path.join(path_out_city, "street_network_edges.shp")
+        #path_trolleybus = os.path.join(path_out_city, "trolleybus.shp")
 
-            if os.path.exists(path_tram):
-                gdf_tram = gpd.read_file(path_tram)
-                G_tram = hp_rw.gdf_to_nx(gdf_tram)
 
-            if os.path.exists(path_bus):
-                gdf_bus = gpd.read_file(path_bus)
-                G_bus = hp_rw.gdf_to_nx(gdf_bus)
+        #gdf_tram = gpd.read_postgis("SELECT * FROM tram", postgis_connection)
+        if osm_tram_gdf.shape[0] > 0: # os.path.exists(path_tram):
+            # TODO: get tram from postgis
+            #gdf_tram = gpd.read_file(path_tram)
+            G_tram = hp_rw.gdf_to_nx(osm_tram_gdf)
 
-            if os.path.exists(path_trolleybus):
-                gdf_trolleybus = gpd.read_file(path_trolleybus)
-                G_trolleybus = hp_rw.gdf_to_nx(gdf_trolleybus)
+        #gdf_bus = gpd.read_postgis("SELECT * FROM bus", postgis_connection)
+        if osm_bus_gdf.shape[0] > 0: #os.path.exists(path_bus):
+            # TODO: get bus from postgis
+            #gdf_bus = gpd.read_file(path_bus)
+            G_bus = hp_rw.gdf_to_nx(osm_bus_gdf)
 
-            if os.path.exists(path_street):
-                gdf_streets = gpd.read_file(path_street)
-                G_streets = hp_rw.gdf_to_nx(gdf_streets)
-                
+        #gdf_trolleybus = gpd.read_postgis("SELECT * FROM trolleybus", postgis_connection)
+        if osm_trolleybus_gdf.shape[0] > 0:
+            # TODO: get trolleybus from postgis
+            #gdf_trolleybus = gpd.read_file(path_trolleybus)
+            G_trolleybus = hp_rw.gdf_to_nx(osm_trolleybus_gdf)
 
-                # Remove footway (new)
-                G_streets = hp_net.remove_edge_by_attribute(G_streets, attribute='tags.highw', value="footway")
-                G_streets = hp_net.G_multilinestring_to_linestring(G_streets, single_segments=True)
+        #gdf_streets = gpd.read_postgis("SELECT * FROM street_network_edges", postgis_connection)
+        gdf_streets = edges
+        if gdf_streets.shape[0] > 0:
+            # TODO: get street (=edges) from postgis
+            #gdf_streets = gpd.read_file(path_street)
+            G_streets = hp_rw.gdf_to_nx(gdf_streets)
 
-                # Criteria which influcence how graphs are spatially merged
-                buffer_dist = 10        # [m]
-                min_edge_distance = 10  # [m]
-                p_min_intersection = 80 # [m] minimum edge percentage which needs to be intersected
 
-                G_streets = hp_net.simplify_network(
-                    G_streets, crit_big_roads=False, crit_bus_is_big_street=crit_bus_is_big_street)
+            # Remove footway (new)
+            G_streets = hp_net.remove_edge_by_attribute(G_streets, attribute='tags.highway', value="footway")
+            G_streets = hp_net.G_multilinestring_to_linestring(G_streets, single_segments=True)
 
-                nx.set_edge_attributes(G_streets, 0, 'tram')
-                nx.set_edge_attributes(G_streets, 0, 'bus')
-                nx.set_edge_attributes(G_streets, 0, 'trolleybus')
+            # Criteria which influcence how graphs are spatially merged
+            buffer_dist = 10        # [m]
+            min_edge_distance = 10  # [m]
+            p_min_intersection = 80 # [m] minimum edge percentage which needs to be intersected
 
-                if os.path.exists(path_bus):    
-                    G_streets = hp_net.check_if_paralell_lines(
-                        G_bus, G_streets, crit_buffer=buffer_dist,
-                        min_edge_distance=min_edge_distance, p_min_intersection=p_min_intersection, label='bus')
+            G_streets = hp_net.simplify_network(
+                G_streets, crit_big_roads=False, crit_bus_is_big_street=crit_bus_is_big_street)
 
-                if os.path.exists(path_tram):
-                    G_streets = hp_net.check_if_paralell_lines(
-                        G_tram, G_streets, crit_buffer=buffer_dist,
-                        min_edge_distance=min_edge_distance, p_min_intersection=p_min_intersection, label='tram')
+            nx.set_edge_attributes(G_streets, 0, 'tram')
+            nx.set_edge_attributes(G_streets, 0, 'bus')
+            nx.set_edge_attributes(G_streets, 0, 'trolleybus')
 
-                if os.path.exists(path_trolleybus):   
-                    G_streets = hp_net.check_if_paralell_lines(
-                        G_trolleybus, G_streets, crit_buffer=buffer_dist,
-                        min_edge_distance=min_edge_distance, p_min_intersection=p_min_intersection, label='trolleybus')
+            if osm_bus_gdf.shape[0] > 0:
+                # TODO: get bus, tram and trollybus from postgis
+                G_streets = hp_net.check_if_paralell_lines(
+                    G_bus, G_streets, crit_buffer=buffer_dist,
+                    min_edge_distance=min_edge_distance, p_min_intersection=p_min_intersection, label='bus')
 
-                nodes, edges = hp_rw.nx_to_gdf(G_streets)
-                edges.to_file(os.path.join(path_out_city, 'street_network_edges_with_attributes.shp'))
+            if osm_tram_gdf.shape[0] > 0:
+                G_streets = hp_net.check_if_paralell_lines(
+                    G_tram, G_streets, crit_buffer=buffer_dist,
+                    min_edge_distance=min_edge_distance, p_min_intersection=p_min_intersection, label='tram')
+
+            if osm_trolleybus_gdf.shape[0] > 0:
+                G_streets = hp_net.check_if_paralell_lines(
+                    G_trolleybus, G_streets, crit_buffer=buffer_dist,
+                    min_edge_distance=min_edge_distance, p_min_intersection=p_min_intersection, label='trolleybus')
+
+            nodes, edges = hp_rw.nx_to_gdf(G_streets)
+
+            # TODO: street edges with attributes to postgis
+            edges.to_postgis("street_network_edges_with_attributes", postgis_connection, if_exists="replace")
+            #edges.to_file(os.path.join(path_out_city, 'street_network_edges_with_attributes.shp'))
 
         print("assign_attributes_to_graph finished")
 
@@ -314,43 +368,49 @@ for city in case_studies:
     # ==============================================================================
     if calculate_pop_density:
         print("calculate_pop_density start")
-        if not os.path.exists(os.path.join(path_out_city, 'street_network_nodes_with_attributes_pop_density.shp')) or write_anyway:
+        #if not os.path.exists(os.path.join(path_out_city, 'street_network_nodes_with_attributes_pop_density.shp')) or write_anyway:
 
-            # Load facebook popluation data
-            gdf_street = gpd.read_file(os.path.join(path_out_city, "street_network_edges_with_attributes.shp"))
-            G = hp_rw.gdf_to_nx(gdf_street)
+        # Load facebook popluation data
+        # TODO: get street edges with attributes from postgis
+        gdf_street = edges
+        #gdf_street = gpd.read_file(os.path.join(path_out_city, "street_network_edges_with_attributes.shp"))
+        G = hp_rw.gdf_to_nx(gdf_street)
 
-            # Get bounding box
-            bb = hp_osm.BB(
-                ymax=max(gdf_street.geometry.bounds.maxy),
-                ymin=min(gdf_street.geometry.bounds.miny),
-                xmax=max(gdf_street.geometry.bounds.maxx),
-                xmin=min(gdf_street.geometry.bounds.minx))
-            bb_pop = bb.as_gdf(crs_orig=int(gdf_street.crs.srs.split(":")[1]))
+        # Get bounding box
+        bb = hp_osm.BB(
+            ymax=max(gdf_street.geometry.bounds.maxy),
+            ymin=min(gdf_street.geometry.bounds.miny),
+            xmax=max(gdf_street.geometry.bounds.maxx),
+            xmin=min(gdf_street.geometry.bounds.minx))
+        bb_pop = bb.as_gdf(crs_orig=int(gdf_street.crs.srs.split(":")[1]))
 
-            if city_metadata['data_type'] == 'GeoTif':
-                pop_pnts = pe.get_fb_pop_data_tif(bb_pop, crs_pop_fb, path_temp=path_temp, path_raw=path_raw_pop, label='population') 
-            elif city_metadata['data_type'] == 'csv':
-                pop_pnts = pe.get_fb_pop_data(bb_pop, crs_pop_fb, path_raw=path_raw_pop, label='population')
-            else:
-                raise Exception("Wrong format type")
-            pop_pnts.to_file(os.path.join(path_out_city, "fb_pop.shp"))
+        if city_metadata['data_type'] == 'GeoTif':
+            pop_pnts = pe.get_fb_pop_data_tif(bb_pop, crs_pop_fb, path_temp=path_temp, path_raw=path_raw_pop, label='population')
+        elif city_metadata['data_type'] == 'csv':
+            pop_pnts = pe.get_fb_pop_data(bb_pop, crs_pop_fb, path_raw=path_raw_pop, label='population')
+        else:
+            raise Exception("Wrong format type")
+        #pop_pnts.to_file(os.path.join(path_out_city, "fb_pop.shp"))
+        pop_pnts.to_postgis("fb_pop", postgis_connection, if_exists="replace")
 
-            # ----Calculate population density
-            G = hp_net.calc_edge_and_node_pop_density(
-                G,
-                pop_pnts,
-                radius=radius_pop_density,
-                attribute_pop='population',
-                label='pop_den')
+        # ----Calculate population density
+        G = hp_net.calc_edge_and_node_pop_density(
+            G,
+            pop_pnts,
+            radius=radius_pop_density,
+            attribute_pop='population',
+            label='pop_den')
 
-            # ----Calculate GFA density based on osm buildings
-            buildings_osm = gpd.read_file(os.path.join(path_out_city, "osm_buildings.shp"))
-            G = hp_net.calc_GFA_density(G, buildings_osm, radius=radius_GFA_density, label='GFA_den')
+        # ----Calculate GFA density based on osm buildings
+        #buildings_osm = gpd.read_file(os.path.join(path_out_city, "osm_buildings.shp"))
+        G = hp_net.calc_GFA_density(G, osm_buildings_gdf, radius=radius_GFA_density, label='GFA_den')
 
-            print("writing out shp")
-            nodes, edges = hp_rw.nx_to_gdf(G) 
-            nodes.to_file(os.path.join(path_out_city, 'street_network_nodes_with_attributes_pop_density.shp'))
-            edges.to_file(os.path.join(path_out_city, 'street_network_edges_with_attributes_pop_density.shp'))
+        print("writing out shp")
+        nodes, edges = hp_rw.nx_to_gdf(G)
+        #nodes.to_file(os.path.join(path_out_city, 'street_network_nodes_with_attributes_pop_density.shp'))
+        #edges.to_file(os.path.join(path_out_city, 'street_network_edges_with_attributes_pop_density.shp'))
+
+        nodes.to_postgis("street_network_nodes_with_attributes_pop_density", postgis_connection, if_exists="replace")
+        edges.to_postgis("street_network_edges_with_attributes_pop_density", postgis_connection, if_exists="replace")
 
 print("-----finished script-----")
