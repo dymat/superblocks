@@ -115,7 +115,7 @@ def classify_flow_cat(
     return G
 
 
-def clean_network_and_assign_capacity(G, flow_factor=1, mode='tags.highw'):
+def clean_network_and_assign_capacity(G, flow_factor=1, mode='tags.highway'):
     """Aasign base flow, i.e. lane capacity
     """
     # Convert to undicrected graph
@@ -139,8 +139,8 @@ def clean_network_and_assign_capacity(G, flow_factor=1, mode='tags.highw'):
             lane_number = 10
         elif mode == 'lanes':
             lane_number = G_undirected.edges[edge]['tags.lanes']
-        elif mode == 'tags.highw':
-            highway_tag = G_undirected.edges[edge]['tags.highw']
+        elif mode == 'tags.highway':
+            highway_tag = G_undirected.edges[edge]['tags.highway']
 
             lane_number = False
             if highway_tag in ['primary', 'primary_link', 'motorway', 'motorway_link']:

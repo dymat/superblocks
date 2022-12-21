@@ -79,7 +79,7 @@ if plot_average_capacity_per_type:
     # https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.core.groupby.DataFrameGroupBy.boxplot.html
     # Read data
     gdf_street = gpd.read_file(os.path.join(path_out, "G_with_traffic_raw.shp"))
-    grouped = gdf_street[['DWV_FZG', 'tags.highw']].groupby('tags.highw')
+    grouped = gdf_street[['DWV_FZG', 'tags.highway']].groupby('tags.highway')
     grouped.boxplot(subplots=False, rot=5, fontsize=4)
     plt.show()
 

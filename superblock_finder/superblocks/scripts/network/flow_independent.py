@@ -11,10 +11,17 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import geopandas as gpd
 
+from sqlalchemy import create_engine
+
 from superblocks.scripts.network import helper_read_write as hp_rw
 from superblocks.scripts.network import flow_algorithm_functions as flow_algorithm_functions
 from superblocks.scripts.network import helper_osm as hp_osm
 from superblocks.scripts.network import helper_network as hp_net
+
+postgis_connection = create_engine(f"postgresql://{os.getenv('POSTGRES_USER', 'postgres')}:" \
+                                   f"{os.getenv('POSTGRES_PASSWORD', 'postgres')}" \
+                                   f"@{os.getenv('POSTGRES_HOST', 'localhost')}:5432/{os.getenv('POSTGRES_DATABASE', 'postgres')}")
+
 
 
 def execute_flow(city, crit_deviations, path_results, path_city_raw):
@@ -43,7 +50,8 @@ def execute_flow(city, crit_deviations, path_results, path_city_raw):
         # =============================================================================================
         # Load bounding box
         # =============================================================================================
-        bb_shp = gpd.read_file(path_bb)
+        #bb_shp = gpd.read_file(path_bb)
+        bb_shp = gpd.read_postgis("SELECT * FROM bbox", postgis_connection, geom_col="geometry")
         bb_global = hp_osm.BB(
             ymax=max(bb_shp.bounds.maxy), ymin=min(bb_shp.bounds.miny),
             xmax=max(bb_shp.bounds.maxx), xmin=min(bb_shp.bounds.minx))
@@ -57,11 +65,12 @@ def execute_flow(city, crit_deviations, path_results, path_city_raw):
         local_bbs = hp_net.generate_fishnet(regional_bb, crit_bb_width=fishnet_size)
 
         # Load data
-        gdf_street = gpd.read_file(path_intervention)
+        #gdf_street = gpd.read_file(path_intervention)
+        gdf_street = gpd.read_postgis("SELECT * FROM cleaned_edges", postgis_connection, geom_col="geometry")
 
         # Remove some street types
         other_streets = ['pedestrian', 'living_street']
-        gdf_street = gdf_street.loc[~gdf_street['tags.highw'].isin(other_streets)]
+        gdf_street = gdf_street.loc[~gdf_street['tags.highway'].isin(other_streets)]
 
         # Full network
         G = hp_rw.gdf_to_nx(gdf_street)
@@ -150,30 +159,34 @@ def execute_flow(city, crit_deviations, path_results, path_city_raw):
             G_base_flow.edges[edge_local]['glob_p'] = G_base_flow.edges[edge_local]['rel_flow']
 
         _, edges = hp_rw.nx_to_gdf(G_base_flow)
-        edges.to_file(os.path.join(path_out, "G_base_flow.shp"))
+        #edges.to_file(os.path.join(path_out, "G_base_flow.shp"))
+        edges.to_postgis("G_base_flow", postgis_connection, if_exists="replace")
 
         # Weigh local and global flow
         G_global = hp_net.flow_reg_glob_calc(
             G_base_flow, f_local=f_local, f_gobal=f_gobal, label_one='local_p', label_two='glob_p', label='flow_ov')
 
         _, gdf_global = hp_rw.nx_to_gdf(G_global)
-        gdf_global.to_file(os.path.join(path_out, "base_flow_edmunds_recalculated.shp"))
+        #gdf_global.to_file(os.path.join(path_out, "base_flow_edmunds_recalculated.shp"))
+        gdf_global.to_postgis("base_flow_edmunds_recalculated", postgis_connection, if_exists="replace")
 
 
     # ------------------------------------------------------------------------
-    # Transfer attributes across diferent deviation scenarios
+    # Transfer attributes across different deviation scenarios
     # ------------------------------------------------------------------------$
     if transfer_attributes:
-        gdf_global = gpd.read_file(os.path.join(path_out, "base_flow_edmunds_recalculated.shp"))
+        try:
+            gdf_global
+        except:
+            gdf_global = gpd.read_postgis("SELECT * FROM base_flow_edmunds_recalculated", postgis_connection, geom_col="geometry")
+
         G_global = hp_rw.gdf_to_nx(gdf_global)
 
         for crit_deviation in crit_deviations:
             #print("... copying attributes to file {}".format(crit_deviation))
             # Load file with crit dev results
 
-            gdf_destination = gpd.read_file(os.path.join(
-                path_temp, 'streets_classified', "classified_edges_{}.shp".format(crit_deviation)))
-            path_classified = os.path.join(path_out, "classified_edges_withflow_{}.shp".format(crit_deviation))
+            gdf_destination = gpd.read_postgis(f'SELECT * FROM "classified_edges_{crit_deviation}"', postgis_connection, geom_col="geometry")
 
             G_destination = hp_rw.gdf_to_nx(gdf_destination)
             for edge in G_global.edges:
@@ -181,9 +194,11 @@ def execute_flow(city, crit_deviations, path_results, path_city_raw):
                     G_destination.edges[edge]['flow_ov'] = G_global.edges[edge]['flow_ov']
 
             _, edges = hp_rw.nx_to_gdf(G_destination)
-            edges.to_file(path_classified)
+
+            edges.to_postgis(f'classified_edges_withflow_{crit_deviation}', postgis_connection, if_exists="replace")
 
 
+'''
 # ------------------------------------------------------------
 # Sole mode (___main____)
 # ------------------------------------------------------------
@@ -195,6 +210,7 @@ if sole_mode:
 # ------------------------------------------------------------
 # Intervention flow
 # ------------------------------------------------------------
+
 plot_intervention_average_flow = False
 if plot_intervention_average_flow:
 
@@ -334,7 +350,6 @@ def calculate_flow_iterateions():
 
 
 
-'''
 # Run flow algorithm
 G = flow_algorithm_functions.flow_emund(G, dict_G_super, max_road_cap=10)
 

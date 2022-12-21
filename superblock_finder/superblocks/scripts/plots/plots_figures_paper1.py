@@ -132,7 +132,7 @@ for crit_deviation in crit_deviations:
             cats=road_flow_categories)
 
         # Remove service streets
-        gdf_selection = gdf.loc[gdf['tags.highw'] != 'service']
+        gdf_selection = gdf.loc[gdf['tags.highway'] != 'service']
 
         # Add calculations to result container
         df['big_road'][city] = np.sum(gdf_selection.loc[gdf_selection['final'] == 'big_road'].geometry.length) / factor_distance

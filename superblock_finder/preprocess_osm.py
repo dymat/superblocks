@@ -4,6 +4,9 @@ Download data from openstreetmap for superblock analysis
 Note: Max 10,000 queries per day and download < 5 GB
 https://wiki.openstreetmap.org/wiki/Overpass_API#:~:text=https%3A%2F%2Flz4.overpass%2Dapi.de%2Fapi%2Finterpreter&text=Any%20of%20the%20three%20servers,about%201%2C000%2C000%20requests%20per%20day.z
 """
+import warnings
+warnings.filterwarnings("ignore")
+
 import os
 import sys
 path_superblocks = os.path.abspath(os.path.join(os.path.dirname(__file__), ''))
@@ -44,7 +47,7 @@ calculate_pop_density = True
 hp_rw.create_folder(path_out)
 
 # Window selection
-length_in_m = 500  # [m]
+length_in_m = 2000  # [m]
 radius_pop_density = 100  # [m]
 radius_GFA_density = 100 # [m]
 sleep_time = 3
@@ -81,8 +84,7 @@ case_studies = [
 postgis_connection = create_engine(f"postgresql://{os.getenv('POSTGRES_USER', 'postgres')}:" \
                      f"{os.getenv('POSTGRES_PASSWORD', 'postgres')}" \
                      f"@{os.getenv('POSTGRES_HOST', 'localhost')}:5432/{os.getenv('POSTGRES_DATABASE', 'postgres')}")
-if not postgis_connection:
-    sys.exit(0)
+
 
 for city in case_studies:
     path_out_city = os.path.join(path_out, str(city))

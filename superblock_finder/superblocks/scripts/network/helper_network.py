@@ -199,7 +199,7 @@ def create_final_classification(
     # Classify big road first
     nx.set_edge_attributes(G, None, "big_road")
     for edge in G.edges:
-        tag_highway = G.edges[edge]['tags.highw']
+        tag_highway = G.edges[edge]['tags.highway']
         crit_tram = G.edges[edge]['tram']
         crit_trolleybus = G.edges[edge]['trolleybus']
         crit_bus = G.edges[edge]['bus']
@@ -211,12 +211,12 @@ def create_final_classification(
     # Classify
     nx.set_edge_attributes(G, None, "final")
     for edge in G.edges:
-        tag_highway = G.edges[edge]['tags.highw']
+        tag_highway = G.edges[edge]['tags.highway']
         b_superb = G.edges[edge]['b_superb']
         b_mini = G.edges[edge]['b_mini']
         b_miniS = G.edges[edge]['b_miniS']
         big_road = G.edges[edge]['big_road']
-        highway_type = G.edges[edge]['tags.highw']
+        highway_type = G.edges[edge]['tags.highway']
 
         # Classification decision tree
         if big_road == 1:
@@ -1075,8 +1075,8 @@ def find_grand_cycle(
     
     # Check if path crosses a bridge (then ignore it) # New 13.12.2021
     for edge in simple_edges_full_path:
-        tunnel_crit = G.edges[edge]['tags.tunne']
-        bridge_crit = G.edges[edge]['tags.bridg']
+        tunnel_crit = G.edges[edge]['tags.tunnel']
+        bridge_crit = G.edges[edge]['tags.bridge']
         if tunnel_crit == 1 or bridge_crit == 1:
             path_crit = False
    
@@ -1085,7 +1085,7 @@ def find_grand_cycle(
 
 def remove_edge_by_attribute(
         G,
-        attribute='tags.highw',
+        attribute='tags.highway',
         value="service"
     ):
     """Remove edge by attribute
@@ -1685,7 +1685,7 @@ def calculate_node_degree(G):
 
     return G
     
-'''def marshall_depth(G, tag_datum='tags.highw', tag_crit_daum='primary'):
+'''def marshall_depth(G, tag_datum='tags.highway', tag_crit_daum='primary'):
     """
     Calculate distance from a "datum" (i.e. major roads)
 
@@ -1787,7 +1787,7 @@ def remove_intersect_building(G, buildings):
     for edge in G.edges:
         edge_geom = G.edges[edge]['geometry']
         
-        if G.edges[edge]['tags.highw'] in ignore_attributes:
+        if G.edges[edge]['tags.highway'] in ignore_attributes:
             continue
         else:
             buildings_intersection = list(rTree.intersection(edge_geom.bounds))

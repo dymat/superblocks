@@ -84,8 +84,8 @@ def generate_miniblock_scenarios(
     #a, b = hp_rw.nx_to_gdf(G_miniblock)
     #b.to_file("J:/Sven/_scrap/miniblock.shp")
     # Do not consider service roads
-    G_local = hp_net.remove_edge_by_attribute(G_local, attribute='tags.highw', value="service")
-    G_miniblock = hp_net.remove_edge_by_attribute(G_miniblock, attribute='tags.highw', value="service")
+    G_local = hp_net.remove_edge_by_attribute(G_local, attribute='tags.highway', value="service")
+    G_miniblock = hp_net.remove_edge_by_attribute(G_miniblock, attribute='tags.highway', value="service")
 
     G_strategy = nx.Graph()
     G_strategy.graph = G_miniblock.graph
@@ -132,7 +132,7 @@ def generate_miniblock_scenarios(
             G_inner_block = nx.compose(G_inner_block, G_inner) #New: ADD INNTER NODE PLUS CHECK ON FULL
             for edge in G_inner_block.edges:
                 if block.contains(LineString(edge)):
-                    tag_highway = G.edges[edge]['tags.highw']
+                    tag_highway = G.edges[edge]['tags.highway']
                     tag_tram = G.edges[edge]['tram']
                     tag_trolley_bus = G.edges[edge]['trolleybus']
                     if crit_bus_is_big_street:
@@ -259,7 +259,7 @@ def generate_superblock_scenarios(
     nx.set_edge_attributes(G_strategy, 0, 'inter_typ')
 
     # Do not consider service roads for cycles
-    G_superblock = hp_net.remove_edge_by_attribute(G_superblock, attribute='tags.highw', value="service")
+    G_superblock = hp_net.remove_edge_by_attribute(G_superblock, attribute='tags.highway', value="service")
 
     # Fast heuristic to find cycles
     _, lodes_larger_deg = hp_net.get_subgraph_degree(G_superblock, degree_nr=4, method='node_removal')
@@ -289,8 +289,8 @@ def generate_superblock_scenarios(
     for cycle in all_cycles:
         edges = hp_net.to_tuple_list(cycle)
         for edge in edges:
-            tunnel_crit = G_local.edges[edge]['tags.tunne']
-            bridge_crit = G_local.edges[edge]['tags.bridg']
+            tunnel_crit = G_local.edges[edge]['tags.tunnel']
+            bridge_crit = G_local.edges[edge]['tags.bridge']
             if tunnel_crit == 1 or bridge_crit == 1:
                 if cycle not in not_good_cycles:
                     not_good_cycles.append(cycle)
@@ -352,7 +352,7 @@ def generate_superblock_scenarios(
             if path_crit:
                 G_in_block = hp_net.get_all_edges_in_block(G_local, block_cycling)
                 for inner_edge in G_in_block.edges:
-                    tag_highway = G_in_block.edges[inner_edge]['tags.highw']
+                    tag_highway = G_in_block.edges[inner_edge]['tags.highway']
                     crit_tram = G_in_block.edges[inner_edge]['tram']
                     crit_trolleybus = G_in_block.edges[inner_edge]['trolleybus']
                     crit_bus = G_in_block.edges[inner_edge]['bus']

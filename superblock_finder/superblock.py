@@ -5,6 +5,9 @@ Main file. Before running this file, openstreetmap data needs to be downloaded b
 import os
 import sys
 
+import warnings
+warnings.filterwarnings("ignore")
+
 path_superblocks = os.path.abspath(os.path.join(os.path.dirname(__file__), ''))
 sys.path.append(path_superblocks)
 from rtree import index
@@ -12,6 +15,8 @@ import logging
 import networkx as nx
 import geopandas as gpd
 import yaml
+
+from sqlalchemy import create_engine
 
 to_crs_meter = 32632  # 2056: CH1903+ / LV95   4326: WSG 84
 
@@ -48,7 +53,7 @@ big_road_labels = ['primary_link', 'primary', 'secondary_link', 'secondary', 'tr
 other_streets = ['pedestrian', 'living_street', 'service']
 
 # Writing out of blocks
-mode_write_individual = False   # True: Create unique shapes for each indivdiual block
+mode_write_individual = True   # True: Create unique shapes for each indivdiual block
 crit_only_full = False          # True: Only full interventions (no overlap)   False: Allow overlaps (but not fully contained)
 type_cadastre = True
 
@@ -119,6 +124,11 @@ print(cities)
 print(crit_deviations)
 print("------")
 
+postgis_connection = create_engine(f"postgresql://{os.getenv('POSTGRES_USER', 'postgres')}:" \
+                                   f"{os.getenv('POSTGRES_PASSWORD', 'postgres')}" \
+                                   f"@{os.getenv('POSTGRES_HOST', 'localhost')}:5432/{os.getenv('POSTGRES_DATABASE', 'postgres')}")
+
+
 for city in cities:
     print("Case study: {}".format(city))
     path_in = os.path.join(path_city_raw, str(city))
@@ -148,7 +158,10 @@ for city in cities:
         # TODO:
         #   (1) get BBox
         #   (2) get intersecting roads, buildings,
-        gdf_roads = gpd.read_file(os.path.join(path_in, initial_street_name))
+        #gdf_roads = gpd.read_file(os.path.join(path_in, initial_street_name))
+
+        # TODO: add where clause with bounding box
+        gdf_roads = gpd.read_postgis("SELECT * FROM street_network_edges_with_attributes_pop_density", postgis_connection, geom_col="geometry")
 
         # Remove Z attribute if it has z geometry
         if list(gdf_roads.has_z)[0]:
@@ -157,8 +170,8 @@ for city in cities:
         # Make selection of attributes
         attributes_to_keep_tested = []
         attributes_to_keep = [
-            'geometry', 'type', 'tags.acces', 'tags.highw', 'tags.tunnel', 'tags.maxsp',
-            'tags.name', 'tram', 'bus', 'trolleybus', 'GFA_den', 'pop_den', 'tags.bridg',
+            'geometry', 'type', 'tags.access', 'tags.highway', 'tags.tunnel', 'tags.maxspeed',
+            'tags.name', 'tram', 'bus', 'trolleybus', 'GFA_den', 'pop_den', 'tags.bridge',
             'DWV_FZG', 'DWG_PW']
 
         for attribute in attributes_to_keep:
@@ -170,7 +183,7 @@ for city in cities:
         G_roads = hp_rw.gdf_to_nx(gdf_roads)
 
         # ----Add bridges attribute, distance
-        tags_to_remodel = ['tags.bridg', 'tags.tunnel']
+        tags_to_remodel = ['tags.bridge', 'tags.tunnel']
         for tag_to_remodel in tags_to_remodel:
             if tag_to_remodel in gdf_roads.columns.tolist():
                 for edge in G_roads.edges:
@@ -179,9 +192,10 @@ for city in cities:
                     else:
                         G_roads.edges[edge][tag_to_remodel] = 0
             else:
-                if os.path.exists(os.path.join(path_in, "bridges.shp")):
-                    gdf_bridges = gpd.read_file(os.path.join(path_in, "bridges.shp"))
-                    G_roads = hp_net.add_attribute_intersection(G_roads, gdf_bridges, label='tags.man_m', label_new=tag_to_remodel)
+                gdf_bridges = gpd.read_postgis("SELECT * FROM bridges", postgis_connection, geom_col="geometry") # TODO: add where clause + bbox
+                if gdf_bridges.shape[0] > 0:
+                    #gdf_bridges = gpd.read_file(os.path.join(path_in, "bridges.shp"))
+                    G_roads = hp_net.add_attribute_intersection(G_roads, gdf_bridges, label='tags.man_made', label_new=tag_to_remodel)
                     for edge in G_roads.edges:
                         if G_roads.edges[edge][tag_to_remodel] == 'bridge':
                             G_roads.edges[edge][tag_to_remodel] = 1
@@ -194,16 +208,17 @@ for city in cities:
 
         # Relabel road if service but has tram on it --> unclassified
         for edge in G_roads.edges:
-            if G_roads.edges[edge]['tags.highw'] == 'service' and G_roads.edges[edge]['tram'] == 1:
-                G_roads.edges[edge]['tags.highw'] = 'unclassified'
+            if G_roads.edges[edge]['tags.highway'] == 'service' and G_roads.edges[edge]['tram'] == 1:
+                G_roads.edges[edge]['tags.highway'] = 'unclassified'
 
         # Remove all private streets and footways
-        G_roads = hp_net.remove_edge_by_attribute(G_roads, attribute='tags.highw', value="footway")
-        G_roads = hp_net.remove_edge_by_attribute(G_roads, attribute='tags.acces', value="private")
-        G_roads = hp_net.remove_edge_by_attribute(G_roads, attribute='tags.highw', value="service")
+        G_roads = hp_net.remove_edge_by_attribute(G_roads, attribute='tags.highway', value="footway")
+        G_roads = hp_net.remove_edge_by_attribute(G_roads, attribute='tags.access', value="private")
+        G_roads = hp_net.remove_edge_by_attribute(G_roads, attribute='tags.highway', value="service")
 
         # Remove nodes which are on top of a building and degree 1
-        buildings = gpd.read_file(os.path.join(path_in, "osm_buildings.shp"))
+        buildings = gpd.read_postgis("SELECT * FROM buildings", postgis_connection, geom_col="geometry")
+        #buildings = gpd.read_file(os.path.join(path_in, "osm_buildings.shp"))
         buildings = hp_osm.remove_faulty_polygons(buildings)
         G_roads = hp_net.remove_intersect_building(G_roads, buildings)
 
@@ -232,15 +247,19 @@ for city in cities:
         G_roads = hp_net.simplify_network(G_roads, crit_bus_is_big_street=crit_bus_is_big_street)
 
         nodes, edges = hp_rw.nx_to_gdf(G_roads)
-        edges.to_file(os.path.join(path_temp, 'simplified_edges.shp'))
-        nodes.to_file(os.path.join(path_temp, 'simplified_nodes.shp'))
+        #edges.to_file(os.path.join(path_temp, 'simplified_edges.shp'))
+        #nodes.to_file(os.path.join(path_temp, 'simplified_nodes.shp'))
+
+        edges.to_postgis("simplified_edges", postgis_connection, if_exists="replace")
+        nodes.to_postgis("simplified_nodes", postgis_connection, if_exists="replace")
         print("...Simplified network")
 
     # ==============================================================================
     # Superblock classification
     # ==============================================================================
     if calculation_of_indicators:
-        gdf_roads = gpd.read_file(os.path.join(path_temp, "simplified_edges.shp"))
+        gdf_roads = edges
+        #gdf_roads = gpd.read_file(os.path.join(path_temp, "simplified_edges.shp"))
 
         G = hp_rw.gdf_to_nx(gdf_roads)
         G = nx.to_undirected(G)
@@ -268,7 +287,7 @@ for city in cities:
         # ==============================================================================
         # Prepare street network for superblock analysis
         # ==============================================================================
-        hp_net.remove_edge_by_attribute(G, attribute='tags.highw', value="pedestrian")
+        hp_net.remove_edge_by_attribute(G, attribute='tags.highway', value="pedestrian")
 
         # Remove edges with local connectivity == 1 (individual cul-de-sac streets)
         # Local edge connectivity: Local edge connectivity for two nodes s and t is the minimum 
@@ -281,23 +300,28 @@ for city in cities:
         G = hp_net.calculate_node_degree(G)
 
         # Recalculate population density after simplifying network
-        pop_pnts = gpd.read_file(os.path.join(path_in, "fb_pop.shp"))
+        pop_pnts = gpd.read_postgis("SELECT * FROM fb_pop", postgis_connection, geom_col="geometry")
         G = hp_net.calc_edge_and_node_pop_density(G, pop_pnts, radius=radius_pop_density, attribute_pop='population', label='pop_den')
 
         # Calculate GFA density based on osm buildings
-        buildings_osm = gpd.read_file(os.path.join(path_in, "osm_buildings.shp"))
+        buildings_osm = gpd.read_postgis("SELECT * FROM buildings", postgis_connection, geom_col="geometry")
         G = hp_net.calc_GFA_density(G, buildings_osm, radius=radius_GFA_density, label='GFA_den')
 
         nodes, edges = hp_rw.nx_to_gdf(G)
-        edges.to_file(os.path.join(path_temp, 'cleaned_edges.shp'))
-        nodes.to_file(os.path.join(path_temp, 'cleaned_nodes.shp'))
+        #edges.to_file(os.path.join(path_temp, 'cleaned_edges.shp'))
+        #nodes.to_file(os.path.join(path_temp, 'cleaned_nodes.shp'))
+
+        edges.to_postgis("cleaned_edges", postgis_connection, if_exists="replace")
+        nodes.to_postgis("cleaned_nodes", postgis_connection, if_exists="replace")
 
     # ---------------------------------------------------------
     # Classify edges
     # ---------------------------------------------------------
     if network_step_analysis_blocktype:
-        gdf_roads = gpd.read_file(os.path.join(path_temp, "cleaned_edges.shp"))
-        gdf_nodes = gpd.read_file(os.path.join(path_temp, "cleaned_nodes.shp"))
+        #gdf_roads = gpd.read_file(os.path.join(path_temp, "cleaned_edges.shp"))
+        #gdf_nodes = gpd.read_file(os.path.join(path_temp, "cleaned_nodes.shp"))
+        gdf_roads = edges
+        gdf_nodes = nodes
         G = hp_rw.gdf_to_nx(gdf_roads)
 
         # Append attributes
@@ -323,15 +347,15 @@ for city in cities:
             neighbors = list(G.neighbors(node4deg))
             for neighbor in neighbors:
                 edge = (node4deg, neighbor)
-                highway = G.edges[edge]['tags.highw']
+                highway = G.edges[edge]['tags.highway']
                 crit_tram = G.edges[edge]['tram']
                 if crit_bus_is_big_street:
                     crit_bus = G.edges[edge]['bus']
                 else:
                     crit_bus = False
                 crit_trolley = G.edges[edge]['trolleybus']
-                crit_bridge = G.edges[edge]['tags.bridg']
-                crit_tunnel = G.edges[edge]['tags.tunne']
+                crit_bridge = G.edges[edge]['tags.bridge']
+                crit_tunnel = G.edges[edge]['tags.tunnel']
                 if highway in big_road_labels or crit_tram or crit_trolley or crit_bus or crit_bridge == 1: #or crit_tunnel
                     nodes_to_ignore.append(node4deg)
 
@@ -359,17 +383,19 @@ for city in cities:
         # ===================================================================
         # ----Create city blocks (urban structure units)
         # ===================================================================
-        gdf_street_raw = gpd.read_file(os.path.join(path_temp, "cleaned_edges.shp"))
-        gdf_street_raw = gdf_street_raw.loc[~gdf_street_raw['tags.highw'].isin(['footway', 'service'])]
+        gdf_street_raw = gdf_roads
+        gdf_street_raw = gdf_street_raw.loc[~gdf_street_raw['tags.highway'].isin(['footway', 'service'])]
         city_blocks = hp_net.create_city_blocks(gdf_street_raw)
-        city_blocks.to_file(os.path.join(path_blocks, "gdf_cleaned_city_blocks.shp"))
 
         # If cadastre, take the cadastre plots
         path_cadastre = os.path.join(path_in, "gdf_cadastre_very_large.shp")
         if type_cadastre and os.path.exists(path_cadastre):
             gdf_other_plots = gpd.read_file(path_cadastre)
             city_blocks = hp_net.clean_city_blocks(city_blocks, gdf_other_plots)
-            city_blocks.to_file(os.path.join(path_blocks, "gdf_cleaned_city_blocks.shp"))
+            #city_blocks.to_file(os.path.join(path_blocks, "gdf_cleaned_city_blocks.shp"))
+
+        #city_blocks.to_file(os.path.join(path_blocks, "gdf_cleaned_city_blocks.shp"))
+        city_blocks.to_postgis("gdf_cleaned_city_blocks", postgis_connection, if_exists="replace")
 
         # ===================================================================
         # Assumptions
@@ -377,132 +403,134 @@ for city in cities:
         G_crit = G.copy()
         G_deg3_4_crit = G_deg3_4.copy()
         for crit_deviation in crit_deviations:
-            path_out_characterized = os.path.join(path_temp_classified, 'characterized_edges_{}.shp'.format(crit_deviation))
+            #path_out_characterized = os.path.join(path_temp_classified, 'characterized_edges_{}.shp'.format(crit_deviation))
 
-            if not os.path.exists(path_out_characterized) or write_anyway:
+            #if not os.path.exists(path_out_characterized) or write_anyway:
 
-                assumptions = hp_sc.get_superblock_assumptions(crit_deviation) # Get assumptions
+            assumptions = hp_sc.get_superblock_assumptions(crit_deviation) # Get assumptions
 
-                # ====================================================================
-                # Mini-S-block (3 blocks, 2x1, similar to 2x2 block)
-                # ====================================================================
-                id_cnt_initial = 100
-                max_id, _, G_miniblockS, container_miniblocks = hp_sc.generate_miniblock_scenarios(
-                    G_crit,
-                    G_deg3_4_crit,
-                    tag_id_miniS,
-                    id_cnt_initial=id_cnt_initial,
-                    max_l_inner_streets=assumptions['miniblock_max_l_inner_streets'],
-                    max_l_outer=assumptions['miniblock_max_l_outer'],
-                    min_l_outer=assumptions['miniblock_min_l_outer'] ,
-                    min_l_inner_streets=assumptions['miniblock_min_l_inner_streets'],
-                    max_block_area=assumptions['miniblock_area'],
-                    crit_nr_nodes_deg34=assumptions['miniblock_crit_nr_nodes_deg34'],
-                    crit_min_pop_den=assumptions['crit_min_pop_den'],
-                    crit_min_GFA_den=assumptions['crit_min_GFA_den'],
-                    degree_nr=3,
-                    crit_bus_is_big_street=crit_bus_is_big_street,
-                    big_road_labels=big_road_labels)
+            # ====================================================================
+            # Mini-S-block (3 blocks, 2x1, similar to 2x2 block)
+            # ====================================================================
+            id_cnt_initial = 100
+            max_id, _, G_miniblockS, container_miniblocks = hp_sc.generate_miniblock_scenarios(
+                G_crit,
+                G_deg3_4_crit,
+                tag_id_miniS,
+                id_cnt_initial=id_cnt_initial,
+                max_l_inner_streets=assumptions['miniblock_max_l_inner_streets'],
+                max_l_outer=assumptions['miniblock_max_l_outer'],
+                min_l_outer=assumptions['miniblock_min_l_outer'] ,
+                min_l_inner_streets=assumptions['miniblock_min_l_inner_streets'],
+                max_block_area=assumptions['miniblock_area'],
+                crit_nr_nodes_deg34=assumptions['miniblock_crit_nr_nodes_deg34'],
+                crit_min_pop_den=assumptions['crit_min_pop_den'],
+                crit_min_GFA_den=assumptions['crit_min_GFA_den'],
+                degree_nr=3,
+                crit_bus_is_big_street=crit_bus_is_big_street,
+                big_road_labels=big_road_labels)
 
-                path_yaml_miniblock = os.path.join(path_temp_classified, 'characterized_edges_{}_miniblock.txt'.format(crit_deviation))
-                file = open(path_yaml_miniblock, "w")
-                yaml.dump(container_miniblocks, file)
-                file.close()
+            path_yaml_miniblock = os.path.join(path_temp_classified, 'characterized_edges_{}_miniblock.txt'.format(crit_deviation))
+            file = open(path_yaml_miniblock, "w")
+            yaml.dump(container_miniblocks, file)
+            file.close()
 
-                # Transfer attribute to street graph
-                nx.set_edge_attributes(G_crit, None, label_miniS)
-                nx.set_edge_attributes(G_crit, None, tag_id_miniS)  
-                for edge in G_miniblockS.edges:
-                    G_crit.edges[edge][label_miniS] = 1
-                    G_crit.edges[edge][tag_id_miniS] = G_miniblockS.edges[edge][tag_id_miniS]
-                    G_crit.edges[edge]['inter_typ'] = G_miniblockS.edges[edge]['inter_typ']
+            # Transfer attribute to street graph
+            nx.set_edge_attributes(G_crit, None, label_miniS)
+            nx.set_edge_attributes(G_crit, None, tag_id_miniS)
+            for edge in G_miniblockS.edges:
+                G_crit.edges[edge][label_miniS] = 1
+                G_crit.edges[edge][tag_id_miniS] = G_miniblockS.edges[edge][tag_id_miniS]
+                G_crit.edges[edge]['inter_typ'] = G_miniblockS.edges[edge]['inter_typ']
 
-                id_cnt_initial = max_id + 100
-                # ====================================================================
-                # Miniblocks (2x2 block)
-                # ====================================================================
-                max_id, _, G_miniblock, container_miniblockS = hp_sc.generate_miniblock_scenarios(
-                    G_crit,
-                    G_deg3_4_crit,
-                    tag_id_minib,
-                    id_cnt_initial=id_cnt_initial,
-                    max_l_inner_streets=assumptions['miniblock_max_l_inner_streets'],
-                    max_l_outer=assumptions['miniblock_max_l_outer'],
-                    min_l_outer=assumptions['miniblock_min_l_outer'] ,
-                    min_l_inner_streets=assumptions['miniblock_min_l_inner_streets'],
-                    max_block_area=assumptions['miniblock_area'],
-                    crit_nr_nodes_deg34=assumptions['miniblock_crit_nr_nodes_deg34'],
-                    degree_nr=4,
-                    crit_min_pop_den=assumptions['crit_min_pop_den'],
-                    crit_min_GFA_den=assumptions['crit_min_GFA_den'],
-                    big_road_labels=big_road_labels)
+            id_cnt_initial = max_id + 100
+            # ====================================================================
+            # Miniblocks (2x2 block)
+            # ====================================================================
+            max_id, _, G_miniblock, container_miniblockS = hp_sc.generate_miniblock_scenarios(
+                G_crit,
+                G_deg3_4_crit,
+                tag_id_minib,
+                id_cnt_initial=id_cnt_initial,
+                max_l_inner_streets=assumptions['miniblock_max_l_inner_streets'],
+                max_l_outer=assumptions['miniblock_max_l_outer'],
+                min_l_outer=assumptions['miniblock_min_l_outer'] ,
+                min_l_inner_streets=assumptions['miniblock_min_l_inner_streets'],
+                max_block_area=assumptions['miniblock_area'],
+                crit_nr_nodes_deg34=assumptions['miniblock_crit_nr_nodes_deg34'],
+                degree_nr=4,
+                crit_min_pop_den=assumptions['crit_min_pop_den'],
+                crit_min_GFA_den=assumptions['crit_min_GFA_den'],
+                big_road_labels=big_road_labels)
 
-                path_yaml_miniblockS = os.path.join(path_temp_classified, 'characterized_edges_{}_miniblockS.txt'.format(crit_deviation))
-                file = open(path_yaml_miniblockS, "w")
-                yaml.dump(container_miniblockS, file)
-                file.close()
+            path_yaml_miniblockS = os.path.join(path_temp_classified, 'characterized_edges_{}_miniblockS.txt'.format(crit_deviation))
+            file = open(path_yaml_miniblockS, "w")
+            yaml.dump(container_miniblockS, file)
+            file.close()
 
-                # Transfer attribute to street graph
-                nx.set_edge_attributes(G_crit, None, label_mini)
-                nx.set_edge_attributes(G_crit, None, tag_id_minib)
-                for edge in G_miniblock.edges:
-                    G_crit.edges[edge][label_mini] = 1
-                    G_crit.edges[edge][tag_id_minib] = G_miniblock.edges[edge][tag_id_minib]
-                    G_crit.edges[edge]['inter_typ'] = G_miniblock.edges[edge]['inter_typ']
+            # Transfer attribute to street graph
+            nx.set_edge_attributes(G_crit, None, label_mini)
+            nx.set_edge_attributes(G_crit, None, tag_id_minib)
+            for edge in G_miniblock.edges:
+                G_crit.edges[edge][label_mini] = 1
+                G_crit.edges[edge][tag_id_minib] = G_miniblock.edges[edge][tag_id_minib]
+                G_crit.edges[edge]['inter_typ'] = G_miniblock.edges[edge]['inter_typ']
 
-                id_cnt_initial = max_id + 100
-                # ====================================================================
-                # Superblocks (3x3)
-                # ====================================================================
-                _, G_superblock, container_blocks = hp_sc.generate_superblock_scenarios(
-                    G_crit,
-                    G_deg3_4_crit,
-                    nodes_to_ignore=nodes_to_ignore,
-                    label=tag_id_superb,
-                    id_cnt_initial=id_cnt_initial,
-                    max_l_inner=assumptions['superblock_max_l_inner'],
-                    min_l_inner=assumptions['superblock_min_l_inner'],
-                    max_l_outer=assumptions['superblock_max_l_outer'],
-                    min_l_outer=assumptions['superblock_min_l_outer'],
-                    max_block_area=assumptions['superblock_area'],
-                    crit_nr_nodes_deg34=assumptions['superblock_crit_nr_nodes_deg34'],
-                    crit_min_pop_den=assumptions['crit_min_pop_den'],
-                    crit_min_GFA_den=assumptions['crit_min_GFA_den'],
-                    degree_nr=4,
-                    big_road_labels=big_road_labels,
-                    crit_bus_is_big_street=crit_bus_is_big_street)
+            id_cnt_initial = max_id + 100
+            # ====================================================================
+            # Superblocks (3x3)
+            # ====================================================================
+            _, G_superblock, container_blocks = hp_sc.generate_superblock_scenarios(
+                G_crit,
+                G_deg3_4_crit,
+                nodes_to_ignore=nodes_to_ignore,
+                label=tag_id_superb,
+                id_cnt_initial=id_cnt_initial,
+                max_l_inner=assumptions['superblock_max_l_inner'],
+                min_l_inner=assumptions['superblock_min_l_inner'],
+                max_l_outer=assumptions['superblock_max_l_outer'],
+                min_l_outer=assumptions['superblock_min_l_outer'],
+                max_block_area=assumptions['superblock_area'],
+                crit_nr_nodes_deg34=assumptions['superblock_crit_nr_nodes_deg34'],
+                crit_min_pop_den=assumptions['crit_min_pop_den'],
+                crit_min_GFA_den=assumptions['crit_min_GFA_den'],
+                degree_nr=4,
+                big_road_labels=big_road_labels,
+                crit_bus_is_big_street=crit_bus_is_big_street)
 
-                path_yaml_superblock = os.path.join(path_temp_classified, 'characterized_edges_{}_superblock.txt'.format(crit_deviation))
-                file = open(path_yaml_superblock, "w")
-                yaml.dump(container_blocks, file)
-                file.close()
+            path_yaml_superblock = os.path.join(path_temp_classified, 'characterized_edges_{}_superblock.txt'.format(crit_deviation))
+            file = open(path_yaml_superblock, "w")
+            yaml.dump(container_blocks, file)
+            file.close()
 
-                # Transfer attribute to street graph
-                nx.set_edge_attributes(G_crit, None, label_superb)
-                nx.set_edge_attributes(G_crit, None, tag_id_superb)
-                for edge in G_superblock.edges:
-                    G_crit.edges[edge][label_superb] = 1
-                    G_crit.edges[edge][tag_id_superb] = G_superblock.edges[edge][tag_id_superb]
-                    G_crit.edges[edge]['inter_typ'] = G_superblock.edges[edge]['inter_typ']
+            # Transfer attribute to street graph
+            nx.set_edge_attributes(G_crit, None, label_superb)
+            nx.set_edge_attributes(G_crit, None, tag_id_superb)
+            for edge in G_superblock.edges:
+                G_crit.edges[edge][label_superb] = 1
+                G_crit.edges[edge][tag_id_superb] = G_superblock.edges[edge][tag_id_superb]
+                G_crit.edges[edge]['inter_typ'] = G_superblock.edges[edge]['inter_typ']
 
-                logging.info("... writing out characterized")
-                nodes, edges = hp_rw.nx_to_gdf(G_crit)
-                edges.to_file(path_out_characterized)
+            logging.info("... writing out characterized")
+            nodes, edges = hp_rw.nx_to_gdf(G_crit)
+            #edges.to_file(path_out_characterized)
+            edges.to_postgis(f"characterized_edges_{crit_deviation}", postgis_connection, if_exists="replace")
 
     # ---------------------------------------------------
     # And which are secondary and tertiary
     # ---------------------------------------------------
     if final_classification:
         print("... final classification")
+
+        # Original street geometry with all original streets
+        gdf_street = gpd.read_postgis(f"SELECT * FROM simplified_edges", postgis_connection, geom_col="geometry")
+        G_street = hp_rw.gdf_to_nx(gdf_street, type='Graph')
+
         for crit_deviation in crit_deviations:
 
             # Load classification
-            superblock_class = gpd.read_file(os.path.join(path_temp_classified, "characterized_edges_{}.shp".format(crit_deviation)))
+            superblock_class = gpd.read_postgis(f'SELECT * FROM "characterized_edges_{crit_deviation}"', postgis_connection, geom_col="geometry")
             G_classified = hp_rw.gdf_to_nx(superblock_class)
-
-            # Original street geometry with all original streets
-            gdf_street = gpd.read_file(os.path.join(path_temp, 'simplified_edges.shp'))
-            G_street = hp_rw.gdf_to_nx(gdf_street, type='Graph')
 
             # Unsimplify, because for previous analysis, some edges were summarised
             G_classified = hp_net.unsimplify(G_classified, G_street)
@@ -524,7 +552,8 @@ for city in cities:
                 crit_consider_bus=crit_bus_is_big_street)
 
             nodes, edges = hp_rw.nx_to_gdf(G_street)
-            edges.to_file(os.path.join(path_temp_classified, 'classified_edges_{}.shp'.format(crit_deviation)))
+            #edges.to_file(os.path.join(path_temp_classified, 'classified_edges_{}.shp'.format(crit_deviation)))
+            edges.to_postgis(f"classified_edges_{crit_deviation}", postgis_connection, if_exists="replace")
 
     # -------------------------------------------------------------
     # Generate individual superblocks (ranking, superblocsk first, then miniblocks)
@@ -556,9 +585,9 @@ for city in cities:
                 type_cadastre = False
 
             # ----Load datasets
-            city_blocks = gpd.read_file(os.path.join(path_blocks, "gdf_cleaned_city_blocks.shp"))
-            gdf_street = gpd.read_file(os.path.join(path_temp, "streets_classified", "characterized_edges_{}.shp".format(crit_deviation)))
-            buildings = gpd.read_file(os.path.join(path_in, "osm_buildings.shp"))
+            city_blocks = gpd.read_postgis("SELECT * FROM gdf_cleaned_city_blocks", postgis_connection, geom_col="geometry")
+            gdf_street = gpd.read_postgis(f'SELECT * FROM "characterized_edges_{crit_deviation}"', postgis_connection, geom_col="geometry")
+            buildings = gpd.read_postgis("SELECT * FROM buildings", postgis_connection, geom_col="geometry")
             G_street = hp_rw.gdf_to_nx(gdf_street)
 
             path_scenario_devation = os.path.join(path_blocks, str(crit_deviation))
@@ -744,14 +773,22 @@ for city in cities:
             print(intersect_buildings.shape)
             print(all_blocks.shape)
             print(blocks_no_street_all.shape)
+
             if gdf_street_areas_all.shape[0] > 0:
                 gdf_street_areas_all.to_file(os.path.join(path_scenario_devation, "street_all.shp"))
+                gdf_street_areas_all.to_postgis("results_street_all", postgis_connection, if_exists="replace")
+
             if intersect_buildings.shape[0] > 0:
                 intersect_buildings.to_file(os.path.join(path_scenario_devation, "buildings_all.shp"))
+                intersect_buildings.to_postgis("results_buildings_all", postgis_connection, if_exists="replace")
+
             if all_blocks.shape[0] > 0:
                 all_blocks['area'] = all_blocks.geometry.area
                 all_blocks.to_file(os.path.join(path_scenario_devation, "block_all.shp"))
+                all_blocks.to_postgis("results_block_all", postgis_connection, if_exists="replace")
+
             if blocks_no_street_all.shape[0] > 0:
                 blocks_no_street_all.to_file(os.path.join(path_scenario_devation, "negative_all.shp"))
-    
+                blocks_no_street_all.to_postgis("results_negative_all", postgis_connection, if_exists="replace")
+
 print("_______  finished_______")
