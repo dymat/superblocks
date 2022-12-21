@@ -79,6 +79,11 @@ crit_write_street_negative = True
 path_city_raw = "/data/cities"
 path_results = "/data/results/results_superblock"
 
+if not os.path.exists(path_results):
+    os.makedirs(path_results)
+if not os.path.exists(path_city_raw):
+    os.makedirs(path_city_raw)
+
 cities = [
     #'atlanta', 
     #'bankok',
@@ -179,7 +184,7 @@ for city in cities:
                 attributes_to_keep_tested.append(attribute)
 
         gdf_roads = gdf_roads[attributes_to_keep_tested]
-        gdf_roads.to_file("/data/tmp/_scrap/first.shp")
+        #gdf_roads.to_file("/data/tmp/_scrap/first.shp")
         G_roads = hp_rw.gdf_to_nx(gdf_roads)
 
         # ----Add bridges attribute, distance

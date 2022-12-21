@@ -39,6 +39,9 @@ path_out = "/data/cities"
 path_pop_data = "/deu_pd_2020_1km.tif"  # Download data as outlined from data source in publication
 write_anyway = False
 
+os.mkdir(path_out)
+os.mkdir(path_temp)
+
 # working steps
 download_data = True
 assign_attributes_to_graph = True
