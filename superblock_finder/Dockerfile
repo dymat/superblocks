@@ -9,4 +9,7 @@ ADD     preprocess_osm.py /preprocess_osm.py
 ADD     superblock.py /superblock.py
 ADD     deu_pd_2020_1km.tif /deu_pd_2020_1km.tif
 
-CMD     ["sleep", "1000d"]
+ADD     app.py /app.py
+
+EXPOSE  8000
+CMD     ["uvicorn", "app:app", "--host='0.0.0.0'", "--port=8000"]

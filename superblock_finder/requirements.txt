@@ -18,3 +18,7 @@ Shapely==1.8.2
 sqlalchemy==1.4.45
 psycopg2==2.9.5
 geoalchemy2==0.12.5
+
+
+fastapi==0.88
+uvicorn==0.20
