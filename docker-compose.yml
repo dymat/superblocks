@@ -28,6 +28,7 @@ services:
     ports:
       - 127.0.0.1:9123:8000
     command: "uvicorn app:app --port 8000 --host '0.0.0.0' --reload"
+    restart: on-failure
 
   postgis:
     image: postgis/postgis:15-3.3-alpine
