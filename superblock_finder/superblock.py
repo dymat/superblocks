@@ -129,8 +129,8 @@ print(cities)
 print(crit_deviations)
 print("------")
 
-postgis_connection = create_engine(f"postgresql://{os.getenv('POSTGRES_USER', 'postgres')}:" \
-                                   f"{os.getenv('POSTGRES_PASSWORD', 'postgres')}" \
+postgis_connection = create_engine(f"postgresql://{os.getenv('POSTGRES_USER', 'postgres')}:"
+                                   f"{os.getenv('POSTGRES_PASSWORD', 'postgres')}"
                                    f"@{os.getenv('POSTGRES_HOST', 'localhost')}:5432/{os.getenv('POSTGRES_DATABASE', 'postgres')}")
 
 
@@ -160,9 +160,7 @@ for city in cities:
         # ==============================================================================
         # Create Street Graph
         # ==============================================================================
-        # TODO:
-        #   (1) get BBox
-        #   (2) get intersecting roads, buildings,
+
         #gdf_roads = gpd.read_file(os.path.join(path_in, initial_street_name))
 
         # TODO: add where clause with bounding box
