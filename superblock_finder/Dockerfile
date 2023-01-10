@@ -8,6 +8,7 @@ ADD     superblocks /superblocks
 ADD     preprocess_osm.py /preprocess_osm.py
 ADD     superblock.py /superblock.py
 ADD     deu_pd_2020_1km.tif /deu_pd_2020_1km.tif
+ADD     _types /_types
 
 ADD     app.py /app.py
 

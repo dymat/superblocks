@@ -17,22 +17,29 @@ services:
 
   superblock:
     build: superblock_finder
+    depends_on:
+      - overpass
+      - postgis
     volumes:
       - ./data:/data
       - ./superblock_finder/superblock.py:/superblock.py:ro
       - ./superblock_finder/app.py:/app.py:ro
+      - ./superblock_finder/_types:/_types:ro
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_DATABASE: ${POSTGRES_DATABASE}
     ports:
       - 127.0.0.1:9123:8000
-    command: "uvicorn app:app --port 8000 --host '0.0.0.0' --reload"
+    command: "uvicorn app:app --port 8000 --host '0.0.0.0'"
     restart: on-failure
 
   postgis:
     image: postgis/postgis:15-3.3-alpine
     restart: on-failure
+    ports:
+      - 127.0.0.1:5432:5432
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
