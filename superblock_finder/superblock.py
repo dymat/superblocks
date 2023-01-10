@@ -136,6 +136,9 @@ postgis_connection = create_engine(f"postgresql://{os.getenv('POSTGRES_USER', 'p
 
 
 def find_superblocks(job_id: int, region_of_interest: Region):
+
+    city = region_of_interest.name
+
     print("Case study: {}".format(city))
     path_in = os.path.join(path_city_raw, str(city))
     path_temp = os.path.join(path_results, str(city))
@@ -165,8 +168,12 @@ def find_superblocks(job_id: int, region_of_interest: Region):
         #gdf_roads = gpd.read_file(os.path.join(path_in, initial_street_name))
 
         # TODO: add where clause with bounding box
-        gdf_roads = gpd.read_postgis("SELECT * FROM street_network_edges_with_attributes_pop_density", postgis_connection, geom_col="geometry")
+        gdf_roads = gpd.read_postgis(f"SELECT A.*, ST_INTERSECTION(A.geometry, B.roi) geometry "
+                                     f"FROM street_network_edges_with_attributes_pop_density as A, jobs as B "
+                                     f"WHERE B.id = {job_id} AND ST_INTERSECTS(A.geometry, B.roi)",
+                                     postgis_connection, geom_col="geometry")
 
+        print(gdf_roads.head())
         # Remove Z attribute if it has z geometry
         if list(gdf_roads.has_z)[0]:
             gdf_roads = hp_net.flatten_geometry(gdf_roads)

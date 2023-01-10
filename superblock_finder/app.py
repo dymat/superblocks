@@ -1,8 +1,9 @@
 from fastapi import FastAPI
 from fastapi.exceptions import HTTPException
-from psycopg import connect
+from psycopg2 import connect
 from os import environ
 from _types import Region, Coord
+from superblock import find_superblocks
 
 app = FastAPI()
 
@@ -40,5 +41,12 @@ def add_job(roi: Region):
                   f"RETURNING *"
             cur.execute(sql)
             result = cur.fetchall()
+
+            try:
+                job_id = result[0][0]
+            except Exception:
+                return HTTPException(status_code=500, detail="Job not added successfully to database.")
+
+            find_superblocks(job_id=job_id, region_of_interest=roi)
 
     return {"coords": roi.coords, "name": roi.name, "return": result}
