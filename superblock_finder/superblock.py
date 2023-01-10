@@ -10,7 +10,6 @@ warnings.filterwarnings("ignore")
 
 path_superblocks = os.path.abspath(os.path.join(os.path.dirname(__file__), ''))
 sys.path.append(path_superblocks)
-from rtree import index
 import logging
 import networkx as nx
 import geopandas as gpd
@@ -25,6 +24,8 @@ from superblocks.scripts.network import helper_osm as hp_osm
 from superblocks.scripts.network import helper_read_write as hp_rw
 from superblocks.scripts.network import helper_scenario as hp_sc
 from superblocks.scripts.network import flow_independent as flow_indep
+
+from _types import Region, Coord
 
 # Parallelization
 parallel_mode = False
@@ -53,7 +54,7 @@ big_road_labels = ['primary_link', 'primary', 'secondary_link', 'secondary', 'tr
 other_streets = ['pedestrian', 'living_street', 'service']
 
 # Writing out of blocks
-mode_write_individual = True   # True: Create unique shapes for each indivdiual block
+mode_write_individual = False   # True: Create unique shapes for each indivdiual block
 crit_only_full = False          # True: Only full interventions (no overlap)   False: Allow overlaps (but not fully contained)
 type_cadastre = True
 
@@ -134,7 +135,7 @@ postgis_connection = create_engine(f"postgresql://{os.getenv('POSTGRES_USER', 'p
                                    f"@{os.getenv('POSTGRES_HOST', 'localhost')}:5432/{os.getenv('POSTGRES_DATABASE', 'postgres')}")
 
 
-for city in cities:
+def find_superblocks(job_id: int, region_of_interest: Region):
     print("Case study: {}".format(city))
     path_in = os.path.join(path_city_raw, str(city))
     path_temp = os.path.join(path_results, str(city))
@@ -391,11 +392,11 @@ for city in cities:
         city_blocks = hp_net.create_city_blocks(gdf_street_raw)
 
         # If cadastre, take the cadastre plots
-        path_cadastre = os.path.join(path_in, "gdf_cadastre_very_large.shp")
-        if type_cadastre and os.path.exists(path_cadastre):
-            gdf_other_plots = gpd.read_file(path_cadastre)
-            city_blocks = hp_net.clean_city_blocks(city_blocks, gdf_other_plots)
-            #city_blocks.to_file(os.path.join(path_blocks, "gdf_cleaned_city_blocks.shp"))
+        #path_cadastre = os.path.join(path_in, "gdf_cadastre_very_large.shp")
+        #if type_cadastre and os.path.exists(path_cadastre):
+        #    gdf_other_plots = gpd.read_file(path_cadastre)
+        #    city_blocks = hp_net.clean_city_blocks(city_blocks, gdf_other_plots)
+        #    #city_blocks.to_file(os.path.join(path_blocks, "gdf_cleaned_city_blocks.shp"))
 
         #city_blocks.to_file(os.path.join(path_blocks, "gdf_cleaned_city_blocks.shp"))
         city_blocks.to_postgis("gdf_cleaned_city_blocks", postgis_connection, if_exists="replace")
@@ -579,13 +580,13 @@ for city in cities:
             2. Miniblocks
             """
             print("... write intervention")
-            path_cadastre = os.path.join(path_in, 'cadastre.shp')
-            if type_cadastre and os.path.exists(path_cadastre):
-                gdf_cadastre_no_buildings = gpd.read_file(os.path.join(path_in, "gdf_cadastre_no_buildings.shp"))
-                gdf_cadastre_no_buildings = gdf_cadastre_no_buildings.reset_index(drop=True)
-                rTree_cadastre = hp_net.build_rTree(gdf_cadastre_no_buildings)
-            else:
-                type_cadastre = False
+            #path_cadastre = os.path.join(path_in, 'cadastre.shp')
+            #if type_cadastre and os.path.exists(path_cadastre):
+            #    gdf_cadastre_no_buildings = gpd.read_file(os.path.join(path_in, "gdf_cadastre_no_buildings.shp"))
+            #    gdf_cadastre_no_buildings = gdf_cadastre_no_buildings.reset_index(drop=True)
+            #    rTree_cadastre = hp_net.build_rTree(gdf_cadastre_no_buildings)
+            #else:
+            #    type_cadastre = False
 
             # ----Load datasets
             city_blocks = gpd.read_postgis("SELECT * FROM gdf_cleaned_city_blocks", postgis_connection, geom_col="geometry")
@@ -688,47 +689,48 @@ for city in cities:
                                     path_superblock_buildigns = os.path.join(path_out_folder, "{}__{}.shp".format("buildings", inter_id))
 
                                 if crit_write_street_area:
-                                    if type_cadastre:
-                                        # ------------------------------------------------
-                                        # If working with existing cadastre plots
-                                        # Select cadastre based on streets of superblocks,
-                                        # Split cadastre with end points of street edges
-                                        # ------------------------------------------------
-                                        # Buffer streets and clip cadastre files (external extrem clipping)
-                                        large_buffer_dist = 30   # m
-                                        gdf_cadastre_clipped = hp_osm.clip_cadastre_too_far_away(
-                                            intervention_gdf, gdf_cadastre_no_buildings, large_buffer_dist, rTree_cadastre)
-                                        gdf_cadastre_clipped = hp_net.gdf_multipolygon_to_polygon(gdf_cadastre_clipped)
-
-                                        # Use clipper lines to segment cadastre
-                                        offset_distance = 30            # [m] Offset distance of cutter lines (15)
-                                        crit_intersection_distance = 5  # [m] Minimum intersection distance necessary to cut polygon
-                                        gdf_cadastre_clipped = hp_osm.spatially_refine_cadastre_with_osm(
-                                            intervention_gdf,
-                                            intervention_G,
-                                            gdf_cadastre_clipped,
-                                            offset_distance=offset_distance,
-                                            crit_intersection_distance=crit_intersection_distance)
-                                        rTree_cadastre_clipped = index.Index()
-                                        for edge_nr, cadastre_plot in enumerate(gdf_cadastre_clipped.geometry):
-                                            rTree_cadastre_clipped.insert(edge_nr, cadastre_plot.bounds)
-
-                                        # --Write street polygon
-                                        gdf_street_areas = hp_osm.spatial_select_cadastre(
-                                            intervention_gdf,
-                                            gdf_cadastre_clipped,
-                                            rTree_cadastre_clipped,
-                                            crit_length_intersection=0.5,
-                                            buffer_size=20,
-                                            crit_area_intersection=0.7,
-                                            min_area_of_cadastre_to_check_intersection=30)  # How much of cadastre area needs to intersect
-
-                                        # Clip street with superblock polyon
-                                        gdf_street_areas_negative = hp_net.clip_streets(superblock_complete, gdf_street_areas)
-                                        gdf_street_areas = hp_net.clip_streets(superblock_complete, gdf_street_areas_negative)
-                                        gdf_street_areas['geometry'] = gdf_street_areas.geometry.buffer(-0.1)
-                                        gdf_street_areas['geometry'] = gdf_street_areas.geometry.buffer(0.1)
-                                    else:
+                                    #if type_cadastre:
+                                    #    # ------------------------------------------------
+                                    #    # If working with existing cadastre plots
+                                    #    # Select cadastre based on streets of superblocks,
+                                    #    # Split cadastre with end points of street edges
+                                    #    # ------------------------------------------------
+                                    #    # Buffer streets and clip cadastre files (external extrem clipping)
+                                    #    large_buffer_dist = 30   # m
+                                    #    gdf_cadastre_clipped = hp_osm.clip_cadastre_too_far_away(
+                                    #        intervention_gdf, gdf_cadastre_no_buildings, large_buffer_dist, rTree_cadastre)
+                                    #    gdf_cadastre_clipped = hp_net.gdf_multipolygon_to_polygon(gdf_cadastre_clipped)
+#
+                                    #    # Use clipper lines to segment cadastre
+                                    #    offset_distance = 30            # [m] Offset distance of cutter lines (15)
+                                    #    crit_intersection_distance = 5  # [m] Minimum intersection distance necessary to cut polygon
+                                    #    gdf_cadastre_clipped = hp_osm.spatially_refine_cadastre_with_osm(
+                                    #        intervention_gdf,
+                                    #        intervention_G,
+                                    #        gdf_cadastre_clipped,
+                                    #        offset_distance=offset_distance,
+                                    #        crit_intersection_distance=crit_intersection_distance)
+                                    #    rTree_cadastre_clipped = index.Index()
+                                    #    for edge_nr, cadastre_plot in enumerate(gdf_cadastre_clipped.geometry):
+                                    #        rTree_cadastre_clipped.insert(edge_nr, cadastre_plot.bounds)
+#
+                                    #    # --Write street polygon
+                                    #    gdf_street_areas = hp_osm.spatial_select_cadastre(
+                                    #        intervention_gdf,
+                                    #        gdf_cadastre_clipped,
+                                    #        rTree_cadastre_clipped,
+                                    #        crit_length_intersection=0.5,
+                                    #        buffer_size=20,
+                                    #        crit_area_intersection=0.7,
+                                    #        min_area_of_cadastre_to_check_intersection=30)  # How much of cadastre area needs to intersect
+#
+                                    #    # Clip street with superblock polyon
+                                    #    gdf_street_areas_negative = hp_net.clip_streets(superblock_complete, gdf_street_areas)
+                                    #    gdf_street_areas = hp_net.clip_streets(superblock_complete, gdf_street_areas_negative)
+                                    #    gdf_street_areas['geometry'] = gdf_street_areas.geometry.buffer(-0.1)
+                                    #    gdf_street_areas['geometry'] = gdf_street_areas.geometry.buffer(0.1)
+                                    #else:
+                                    if True: # TODO: please refactor this very ugly quick fix (denny)
                                         # Get area based on street estimation
                                         print("Get area based on street estimation")
                                         gdf_street_areas = hp_net.create_artifical_street_area(intervention_gdf, buildings)
@@ -777,21 +779,27 @@ for city in cities:
             print(all_blocks.shape)
             print(blocks_no_street_all.shape)
 
+            # set job id
+            gdf_street_areas_all["job_id"] = job_id
+            intersect_buildings["job_id"] = job_id
+            all_blocks["job_id"] = job_id
+            blocks_no_street_all["job_id"] = job_id
+
             if gdf_street_areas_all.shape[0] > 0:
-                gdf_street_areas_all.to_file(os.path.join(path_scenario_devation, "street_all.shp"))
+                #gdf_street_areas_all.to_file(os.path.join(path_scenario_devation, "street_all.shp"))
                 gdf_street_areas_all.to_postgis("results_street_all", postgis_connection, if_exists="replace")
 
             if intersect_buildings.shape[0] > 0:
-                intersect_buildings.to_file(os.path.join(path_scenario_devation, "buildings_all.shp"))
+                #intersect_buildings.to_file(os.path.join(path_scenario_devation, "buildings_all.shp"))
                 intersect_buildings.to_postgis("results_buildings_all", postgis_connection, if_exists="replace")
 
             if all_blocks.shape[0] > 0:
                 all_blocks['area'] = all_blocks.geometry.area
-                all_blocks.to_file(os.path.join(path_scenario_devation, "block_all.shp"))
+                #all_blocks.to_file(os.path.join(path_scenario_devation, "block_all.shp"))
                 all_blocks.to_postgis("results_block_all", postgis_connection, if_exists="replace")
 
             if blocks_no_street_all.shape[0] > 0:
-                blocks_no_street_all.to_file(os.path.join(path_scenario_devation, "negative_all.shp"))
+                #blocks_no_street_all.to_file(os.path.join(path_scenario_devation, "negative_all.shp"))
                 blocks_no_street_all.to_postgis("results_negative_all", postgis_connection, if_exists="replace")
 
 print("_______  finished_______")
