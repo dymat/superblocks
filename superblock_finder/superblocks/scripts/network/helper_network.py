@@ -2226,6 +2226,8 @@ def simplify_network(G, crit_big_roads=True, crit_bus_is_big_street=False):
     
     G.graph['crs'] = crs_from
 
+    print("non geometric simplification finished", G)
+
     return G
 
 

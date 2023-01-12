@@ -23,6 +23,7 @@ services:
     volumes:
       - ./data:/data
       - ./superblock_finder/superblock.py:/superblock.py:ro
+      - ./superblock_finder/preprocess_osm.py:/preprocess_osm.py:ro
       - ./superblock_finder/app.py:/app.py:ro
       - ./superblock_finder/_types:/_types:ro
     environment:
@@ -34,6 +35,17 @@ services:
       - 127.0.0.1:9123:8000
     command: "uvicorn app:app --port 8000 --host '0.0.0.0'"
     restart: on-failure
+
+  frontend:
+    build:
+      context: frontend
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+      - ./frontend/package.json:/app/package.json
+      - ./frontend/package-lock.json:/app/package-lock.json
+    ports:
+      - 127.0.0.1:3000:3000
 
   postgis:
     image: postgis/postgis:15-3.3-alpine

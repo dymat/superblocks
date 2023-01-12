@@ -39,8 +39,15 @@ path_out = "/data/cities"
 path_pop_data = "/deu_pd_2020_1km.tif"  # Download data as outlined from data source in publication
 write_anyway = False
 
-os.mkdir(path_out)
-os.mkdir(path_temp)
+try:
+    os.makedirs(path_out)
+except:
+    pass
+
+try:
+    os.makedirs(path_temp)
+except:
+    pass
 
 # working steps
 download_data = True
@@ -50,7 +57,7 @@ calculate_pop_density = True
 hp_rw.create_folder(path_out)
 
 # Window selection
-length_in_m = 2000  # [m]
+length_in_m = 5000  # [m]
 radius_pop_density = 100  # [m]
 radius_GFA_density = 100 # [m]
 sleep_time = 3
@@ -58,6 +65,7 @@ crit_bus_is_big_street = False
 swiss_community = False
 
 case_studies = [
+    #'deutschland',
     #'atlanta',
     #'bankok',        
     #'barcelona',     
@@ -103,23 +111,22 @@ for city in case_studies:
         # Download first bounding box shp (as WSG84 crs)
         centroid = Point(centroid_tuple)
         centroid = gpd.GeoDataFrame([centroid], columns=['geometry'], crs=crs_bb)
-        centroid.to_file(os.path.join(path_out_city, "centroid.shp"))
+        #centroid.to_file(os.path.join(path_out_city, "centroid.shp"))
 
         centroid_to_crs_meter = centroid.to_crs("epsg:{}".format(to_crs_meter))
-        centroid.to_file(os.path.join(path_out_city, "centroid_{}.shp".format(to_crs_meter)))
+        #centroid.to_file(os.path.join(path_out_city, "centroid_{}.shp".format(to_crs_meter)))
         bb = hp_osm.BB(
             ymax=centroid_to_crs_meter.geometry.y[0] + length_in_m / 2,
             ymin=centroid_to_crs_meter.geometry.y[0] - length_in_m / 2,
             xmax=centroid_to_crs_meter.geometry.x[0] + length_in_m / 2,
             xmin=centroid_to_crs_meter.geometry.x[0] - length_in_m / 2)
 
-
         bb_gdf = bb.as_gdf(crs_orig=to_crs_meter)
 
         # bb to postgis
         bb_gdf.to_postgis("bbox", postgis_connection, if_exists="replace")
 
-        bb_gdf.to_file(os.path.join(path_out_city, "extent.shp"))
+        #bb_gdf.to_file(os.path.join(path_out_city, "extent.shp"))
         bb_osm = bb_gdf.to_crs("epsg:{}".format(crs_bb))
         bb = hp_osm.BB(
             ymax=bb_osm.geometry.bounds.maxy[0],
@@ -236,8 +243,8 @@ for city in case_studies:
 
                 # TODO: trolleybus to postgis
                 osm_trolleybus_gdf.to_postgis("trolleybus", postgis_connection, if_exists="replace")
-                osm_trolleybus_gdf.to_file(path_trolleybus)
-  
+                #osm_trolleybus_gdf.to_file(path_trolleybus)
+
         # Download streets
         #if not os.path.exists(path_streets_edges) or write_anyway:
         time.sleep(sleep_time)
@@ -252,10 +259,14 @@ for city in case_studies:
             G_simple = hp_net.simplify_network(
                 G, crit_big_roads=False, crit_bus_is_big_street=crit_bus_is_big_street)
 
+            print("main func", G_simple)
+
             # TODO: street network (Nodes + Edges to postgis)
             nodes, edges = hp_rw.nx_to_gdf(G_simple)
             #nodes.to_file(path_streets_nodes)
             #edges.to_file(path_streets_edges)
+
+            print("Streets", edges.shape)
 
             nodes.to_postgis("street_network_nodes", postgis_connection, if_exists="replace")
             edges.to_postgis("street_network_edges", postgis_connection, if_exists="replace")
@@ -326,7 +337,6 @@ for city in case_studies:
             # TODO: get street (=edges) from postgis
             #gdf_streets = gpd.read_file(path_street)
             G_streets = hp_rw.gdf_to_nx(gdf_streets)
-
 
             # Remove footway (new)
             G_streets = hp_net.remove_edge_by_attribute(G_streets, attribute='tags.highway', value="footway")

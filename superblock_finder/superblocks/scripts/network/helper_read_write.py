@@ -54,6 +54,11 @@ def city_metadata(city, path_pop_data="C:/DATA/pop_fb"):
     Note: Centroid need to be provided from 4326
     """
     metadata = {
+        'deutschland': {
+            'data_type': 'GeoTif',
+            'centroid_tuple': (9.772966975048563, 52.37886144060916),
+            'path_raw_pop': os.path.join(path_pop_data),
+            'crs': 32632},
         'zurich': {
             'data_type': 'GeoTif',
             'centroid_tuple': (8.536838, 47.372925),
@@ -302,7 +307,8 @@ def gdf_to_nx(
 
     G.graph['crs'] = gdf_network.crs
 
-    for index, row in gdf_network.iterrows():
+    for index, row in gdf_network.explode().iterrows():
+        print(row.geometry.coords[0])
         first = row.geometry.coords[0]
         last = row.geometry.coords[-1]
         geometry = row.geometry
@@ -380,10 +386,14 @@ def nx_to_gdf(net, nodeID="nodeID"):
         cnt += 1
 
     # Create nodes
+    print("before _points_to_gdf net", net)
     gdf_nodes = _points_to_gdf(net)
+    print("after _points_to_gdf gdf_nodes", gdf_nodes)
 
     # Create edges
+    print("before _lines_to_gdf net", net)
     gdf_edges = _lines_to_gdf(net, nodeID)
+    print("after _lines_to_gdf gdf_edges", gdf_edges)
 
     return gdf_nodes, gdf_edges
 
