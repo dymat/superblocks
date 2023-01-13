@@ -35,7 +35,6 @@ function App() {
                         lat: latlng.lat,
                         lng: latlng.lng
                     }))
-                    console.log(coords_list)
                     setRoi(coords_list)
                     setCurrentLayer(lastLayer)
                 }
@@ -46,8 +45,6 @@ function App() {
     const colors = ["#D32F2F", "#7B1FA2", "#1976D2", "#0097A7", "#388E3C", "#AFB42B", "#FFA000", "#E64A19"]
 
     const handleStartAnalyze = () => {
-        console.log(roi)
-
         const data = {
             name: "Berlin",
             coords: roi
@@ -91,6 +88,7 @@ function App() {
 
         return shapes
     }
+
 
     return <Dashboard analyze={handleStartAnalyze} data={currentResponse} onHoverOverListItem={setHighlightedBlockId}>
         <MapContainer center={[52.509, 13.385]} zoom={13} scrollWheelZoom={true}
