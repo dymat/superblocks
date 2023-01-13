@@ -303,6 +303,8 @@ def find_superblocks(job_id: int, region_of_interest: Region):
         nodes["job_id"] = job_id
 
         edges.to_postgis("cleaned_edges", postgis_connection, if_exists="append")
+
+        nodes["eccentr"] = nodes["eccentr"].astype(float)
         nodes.to_postgis("cleaned_nodes", postgis_connection, if_exists="append")
 
     # ---------------------------------------------------------
