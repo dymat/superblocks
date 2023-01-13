@@ -20,6 +20,7 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import ListItemText from "@mui/material/ListItemText";
 import ListItemButton from "@mui/material/ListItemButton";
+import ListSubheader from "@mui/material/ListSubheader";
 
 
 const drawerWidth = 240;
@@ -120,8 +121,30 @@ function Dashboard(props) {
         })
 
         return <>
+
+            {
+                listSuperblocks.length > 0 ?
+                    <ListSubheader component="div" inset>
+                        Superblocks
+                    </ListSubheader>
+                    : null
+            }
             {listSuperblocks}
-            <Divider/>
+
+            {
+                listSuperblocks.length > 0 && listMiniblocks.length > 0 ?
+                    <Divider/>
+                    : null
+            }
+
+
+            {
+                listMiniblocks.length > 0 ?
+                    <ListSubheader component="div" inset>
+                        Miniblocks
+                    </ListSubheader>
+                    : null
+            }
             {listMiniblocks}
         </>
     }
