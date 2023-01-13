@@ -10,7 +10,6 @@ function App() {
     const [roi, setRoi] = useState([])
     const fgRef = useRef(null)
     const [currentLayer, setCurrentLayer] = useState(null)
-    const [currentColor, setCurrentColor] = useState(0)
     const [currentResponse, setCurrentResponse] = useState({})
     const [showResults, setShowResults] = useState({
         blocks: true,
@@ -46,11 +45,6 @@ function App() {
 
     const colors = ["#D32F2F", "#7B1FA2", "#1976D2", "#0097A7", "#388E3C", "#AFB42B", "#FFA000", "#E64A19"]
 
-    const changeColor = () => {
-        currentLayer?.setStyle({color: colors[currentColor]})
-        setCurrentColor((currentColor + 1) % colors.length)
-    }
-
     const handleStartAnalyze = () => {
         console.log(roi)
 
@@ -73,7 +67,30 @@ function App() {
             .then(json => setCurrentResponse(json))
     }
 
-    console.log(currentResponse, highlightedBlockId)
+
+    if (currentLayer && Object.keys(currentResponse).length > 0 ) {
+        currentLayer.bringToBack()
+        currentLayer.setStyle({fillOpacity: 0.02, weight: 3})
+    }
+
+    const renderSuperblocks = (key) => {
+        if (!showResults[key] || !Object.keys(currentResponse).includes(key)) {
+            return null
+        }
+
+        const shapes = currentResponse[key].features.map(item => {
+            const blockId = item.properties.inter_id
+            const style = {
+                color: colors[blockId % colors.length],
+                weight: highlightedBlockId === blockId ? 5 : 2,
+                fillOpacity: highlightedBlockId === blockId ? 0.8 : 0.3
+            }
+
+            return <GeoJSON data={item} key={`${key}-${blockId}`} style={style}/>
+        })
+
+        return shapes
+    }
 
     return <Dashboard analyze={handleStartAnalyze} data={currentResponse} onHoverOverListItem={setHighlightedBlockId}>
         <MapContainer center={[52.509, 13.385]} zoom={13} scrollWheelZoom={true}
@@ -110,14 +127,22 @@ function App() {
                         <GeoJSON key={`streets-${currentResponse.job_id}`} data={currentResponse.streets}/> : null
                 }
 
-                {
+                { /*
                     showResults.blocks && Object.keys(currentResponse).includes("blocks") ?
                         <GeoJSON key={`blocks-${currentResponse.job_id}`} data={currentResponse.blocks}/> : null
+                        */
+                }
+
+                {
+
+                    renderSuperblocks('blocks')
+
                 }
 
                 {
                     showResults.blocks_no_street && Object.keys(currentResponse).includes("blocks_no_street") ?
-                        <GeoJSON key={`blocks_no_street-${currentResponse.job_id}`} data={currentResponse.blocks_no_street}/> : null
+                        <GeoJSON key={`blocks_no_street-${currentResponse.job_id}`}
+                                 data={currentResponse.blocks_no_street}/> : null
                 }
 
                 {
@@ -133,7 +158,8 @@ function App() {
                 <Button color={!showResults.blocks ? "primary" : "secondary"}
                         onClick={() => setShowResults({...showResults, ...{blocks: !showResults.blocks}})}>Super/Mini-Blocks</Button>
                 <Button color={!showResults.blocks_no_street ? "primary" : "secondary"}
-                        onClick={() => setShowResults({...showResults, ...{blocks_no_street: !showResults.blocks_no_street}})}>Einzelne Blocks</Button>
+                        onClick={() => setShowResults({...showResults, ...{blocks_no_street: !showResults.blocks_no_street}})}>Einzelne
+                    Blocks</Button>
                 <Button color={!showResults.streets ? "primary" : "secondary"}
                         onClick={() => setShowResults({...showResults, ...{streets: !showResults.streets}})}>Straßen</Button>
                 <Button color={!showResults.buildings ? "primary" : "secondary"}

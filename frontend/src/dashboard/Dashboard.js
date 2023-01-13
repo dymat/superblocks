@@ -90,11 +90,15 @@ function Dashboard(props) {
             const blockId = block.properties.inter_id
 
             return (
-                <ListItemButton key={`miniblock-list-item-${blockId}`}>
+                <ListItemButton
+                    key={`miniblock-list-item-${blockId}`}
+                    onMouseOver={() => props.onHoverOverListItem(blockId)}
+                    onMouseOut={() => props.onHoverOverListItem(-1)}
+                >
                     <ListItemIcon>
                         <DashboardIcon/>
                     </ListItemIcon>
-                    <ListItemText primary={`Miniblock #${blockId}`} onMouseOver={() => props.onHoverOverListItem(blockId) && console.log("miniblock", blockId)}/>
+                    <ListItemText primary={`Miniblock #${blockId}`}/>
                 </ListItemButton>)
         })
 
@@ -103,11 +107,15 @@ function Dashboard(props) {
             const blockId = block.properties.inter_id
 
             return (
-                <ListItemButton key={`superblock-list-item-${blockId}`}>
+                <ListItemButton
+                    key={`superblock-list-item-${blockId}`}
+                    onMouseOver={() => props.onHoverOverListItem(blockId)}
+                    onMouseOut={() => props.onHoverOverListItem(-1)}
+                >
                     <ListItemIcon>
                         <DashboardIcon/>
                     </ListItemIcon>
-                    <ListItemText primary={`Superblock #${blockId}`} onMouseOver={() => props.onHoverOverListItem(blockId) && console.log("superblock", blockId)} />
+                    <ListItemText primary={`Superblock #${blockId}`}/>
                 </ListItemButton>)
         })
 
