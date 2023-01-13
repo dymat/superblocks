@@ -127,9 +127,9 @@ def find_superblocks(job_id: int, region_of_interest: Region):
                                      f'A."tags.tunnel", A."tags.maxspeed", '
                                      f'A.tram, A.bus, A.trolleybus, A."tags.name", '
                                      f'A."GFA_den", A."pop_den", A."tags.bridge", '
-                                     f'ST_INTERSECTION(A.geometry, ST_TRANSFORM(B.roi, ST_SRID(A.geometry))) geometry '
+                                     f'ST_INTERSECTION(A.geometry, ST_BUFFER(ST_TRANSFORM(B.roi, ST_SRID(A.geometry)), 50)) geometry '
                                      f'FROM street_network_edges_with_attributes_pop_density as A, jobs as B '
-                                     f'WHERE B.id = {job_id} AND ST_INTERSECTS(A.geometry, ST_TRANSFORM(B.roi, ST_SRID(A.geometry)))',
+                                     f'WHERE B.id = {job_id} AND ST_INTERSECTS(A.geometry, ST_BUFFER(ST_TRANSFORM(B.roi, ST_SRID(A.geometry)), 50))',
                                      postgis_connection, geom_col="geometry")
 
         if len(gdf_roads) == 0:
@@ -152,7 +152,6 @@ def find_superblocks(job_id: int, region_of_interest: Region):
 
         gdf_roads = gdf_roads[attributes_to_keep_tested]
 
-        print(gdf_roads)
         #gdf_roads.to_file("/data/tmp/_scrap/first.shp")
         G_roads = hp_rw.gdf_to_nx(gdf_roads)
 

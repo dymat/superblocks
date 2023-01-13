@@ -71,11 +71,6 @@ def add_job(roi: Region):
             all_blocks.to_crs(epsg=4326, inplace=True)
             blocks_no_street_all.to_crs(epsg=4326, inplace=True)
 
-            print("gdf_street_areas_all", gdf_street_areas_all.columns)
-            print("intersect_buildings", intersect_buildings.columns)
-            print("all_blocks", all_blocks.columns)
-            print("blocks_no_street_all", blocks_no_street_all.columns)
-
             streets_geojson = gdf_street_areas_all.to_json()
             buildings_geojson = intersect_buildings.to_json()
             blocks_geojson = all_blocks.to_json()
