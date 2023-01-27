@@ -1,5 +1,4 @@
 import React, {useState, useRef} from 'react';
-
 import Dashboard from './dashboard/Dashboard'
 import {MapContainer, TileLayer, FeatureGroup, GeoJSON} from "react-leaflet";
 import {EditControl} from "react-leaflet-draw"
@@ -65,7 +64,7 @@ function App() {
     }
 
 
-    if (currentLayer && Object.keys(currentResponse).length > 0 ) {
+    if (currentLayer && Object.keys(currentResponse).length > 0) {
         currentLayer.bringToBack()
         currentLayer.setStyle({fillOpacity: 0.02, weight: 3})
     }
