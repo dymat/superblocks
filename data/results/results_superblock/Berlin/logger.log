@@ -1,0 +1,570 @@
+2023-01-23 09:57:51,017 - shapely.geos - INFO - Ring Self-intersection at or near point 798121.59668123967 5827878.8545393487
+2023-01-23 09:57:51,018 - root - INFO -  
+2023-01-23 09:57:51,018 - root - INFO - --- Minibock is ignored
+2023-01-23 09:57:51,018 - root - INFO - inner_street_l:          727.3020170193222
+2023-01-23 09:57:51,018 - root - INFO - max_l_inner_streets:     1280.0
+2023-01-23 09:57:51,018 - root - INFO - min_l_inner_streets:     160.0
+2023-01-23 09:57:51,018 - root - INFO - outer_cycle_length:      0
+2023-01-23 09:57:51,018 - root - INFO - max_l_outer:             2560.0
+2023-01-23 09:57:51,018 - root - INFO - min_l_outer:             426.667
+2023-01-23 09:57:51,018 - root - INFO - path_crit:               0
+2023-01-23 09:57:51,018 - root - INFO - average_GFA_den:         0.28113519884180954
+2023-01-23 09:57:51,018 - root - INFO - average_pop_den:         0.0
+2023-01-23 09:57:51,021 - shapely.geos - INFO - Ring Self-intersection at or near point 798285.6162192265 5827435.8881944902
+2023-01-23 09:57:51,021 - root - INFO -  
+2023-01-23 09:57:51,021 - root - INFO - --- Minibock is ignored
+2023-01-23 09:57:51,021 - root - INFO - inner_street_l:          413.5762910263654
+2023-01-23 09:57:51,021 - root - INFO - max_l_inner_streets:     1280.0
+2023-01-23 09:57:51,021 - root - INFO - min_l_inner_streets:     160.0
+2023-01-23 09:57:51,021 - root - INFO - outer_cycle_length:      0
+2023-01-23 09:57:51,021 - root - INFO - max_l_outer:             2560.0
+2023-01-23 09:57:51,022 - root - INFO - min_l_outer:             426.667
+2023-01-23 09:57:51,022 - root - INFO - path_crit:               0
+2023-01-23 09:57:51,022 - root - INFO - average_GFA_den:         0.13861088071106495
+2023-01-23 09:57:51,022 - root - INFO - average_pop_den:         0.0
+2023-01-23 09:57:51,023 - shapely.geos - INFO - Ring Self-intersection at or near point 798352.30813007802 5827455.6320773298
+2023-01-23 09:57:51,024 - root - INFO -  
+2023-01-23 09:57:51,024 - root - INFO - --- Minibock is ignored
+2023-01-23 09:57:51,024 - root - INFO - inner_street_l:          403.7221556690838
+2023-01-23 09:57:51,024 - root - INFO - max_l_inner_streets:     1280.0
+2023-01-23 09:57:51,024 - root - INFO - min_l_inner_streets:     160.0
+2023-01-23 09:57:51,024 - root - INFO - outer_cycle_length:      0
+2023-01-23 09:57:51,024 - root - INFO - max_l_outer:             2560.0
+2023-01-23 09:57:51,024 - root - INFO - min_l_outer:             426.667
+2023-01-23 09:57:51,024 - root - INFO - path_crit:               0
+2023-01-23 09:57:51,024 - root - INFO - average_GFA_den:         0.2637317388373969
+2023-01-23 09:57:51,024 - root - INFO - average_pop_den:         0.0
+2023-01-23 09:57:51,026 - shapely.geos - INFO - Ring Self-intersection at or near point 798268.53716661804 5827525.5119744223
+2023-01-23 09:57:51,027 - root - INFO -  
+2023-01-23 09:57:51,027 - root - INFO - --- Minibock is ignored
+2023-01-23 09:57:51,027 - root - INFO - inner_street_l:          490.7989844584448
+2023-01-23 09:57:51,027 - root - INFO - max_l_inner_streets:     1280.0
+2023-01-23 09:57:51,027 - root - INFO - min_l_inner_streets:     160.0
+2023-01-23 09:57:51,027 - root - INFO - outer_cycle_length:      0
+2023-01-23 09:57:51,027 - root - INFO - max_l_outer:             2560.0
+2023-01-23 09:57:51,027 - root - INFO - min_l_outer:             426.667
+2023-01-23 09:57:51,027 - root - INFO - path_crit:               0
+2023-01-23 09:57:51,027 - root - INFO - average_GFA_den:         0.4377334637828056
+2023-01-23 09:57:51,027 - root - INFO - average_pop_den:         0.0
+2023-01-23 09:57:51,034 - shapely.geos - INFO - Ring Self-intersection at or near point 797872.19096621987 5826757.1172115151
+2023-01-23 09:57:51,035 - root - INFO -  
+2023-01-23 09:57:51,035 - root - INFO - --- Minibock is ignored
+2023-01-23 09:57:51,035 - root - INFO - inner_street_l:          362.1255359786732
+2023-01-23 09:57:51,035 - root - INFO - max_l_inner_streets:     1280.0
+2023-01-23 09:57:51,035 - root - INFO - min_l_inner_streets:     160.0
+2023-01-23 09:57:51,035 - root - INFO - outer_cycle_length:      0
+2023-01-23 09:57:51,035 - root - INFO - max_l_outer:             2560.0
+2023-01-23 09:57:51,035 - root - INFO - min_l_outer:             426.667
+2023-01-23 09:57:51,035 - root - INFO - path_crit:               0
+2023-01-23 09:57:51,035 - root - INFO - average_GFA_den:         0.36533742962599286
+2023-01-23 09:57:51,035 - root - INFO - average_pop_den:         0.0
+2023-01-23 09:57:51,038 - shapely.geos - INFO - Ring Self-intersection at or near point 798002.30743523047 5826778.8449934777
+2023-01-23 09:57:51,038 - root - INFO -  
+2023-01-23 09:57:51,038 - root - INFO - --- Minibock is ignored
+2023-01-23 09:57:51,038 - root - INFO - inner_street_l:          433.8593008917921
+2023-01-23 09:57:51,038 - root - INFO - max_l_inner_streets:     1280.0
+2023-01-23 09:57:51,038 - root - INFO - min_l_inner_streets:     160.0
+2023-01-23 09:57:51,038 - root - INFO - outer_cycle_length:      0
+2023-01-23 09:57:51,039 - root - INFO - max_l_outer:             2560.0
+2023-01-23 09:57:51,039 - root - INFO - min_l_outer:             426.667
+2023-01-23 09:57:51,039 - root - INFO - path_crit:               0
+2023-01-23 09:57:51,039 - root - INFO - average_GFA_den:         0.48458249797537956
+2023-01-23 09:57:51,039 - root - INFO - average_pop_den:         0.0
+2023-01-23 09:57:51,040 - shapely.geos - INFO - Ring Self-intersection at or near point 798025.99302539486 5826691.6537208091
+2023-01-23 09:57:51,043 - root - INFO -  
+2023-01-23 09:57:51,043 - root - INFO - --- Minibock is ignored
+2023-01-23 09:57:51,043 - root - INFO - inner_street_l:          433.72252830210437
+2023-01-23 09:57:51,043 - root - INFO - max_l_inner_streets:     1280.0
+2023-01-23 09:57:51,043 - root - INFO - min_l_inner_streets:     160.0
+2023-01-23 09:57:51,043 - root - INFO - outer_cycle_length:      0
+2023-01-23 09:57:51,043 - root - INFO - max_l_outer:             2560.0
+2023-01-23 09:57:51,043 - root - INFO - min_l_outer:             426.667
+2023-01-23 09:57:51,043 - root - INFO - path_crit:               0
+2023-01-23 09:57:51,043 - root - INFO - average_GFA_den:         0.28104524505173434
+2023-01-23 09:57:51,043 - root - INFO - average_pop_den:         0.0
+2023-01-23 09:57:51,045 - shapely.geos - INFO - Self-intersection at or near point 798130.59231535695 5826806.6004933966
+2023-01-23 09:57:51,046 - root - INFO -  
+2023-01-23 09:57:51,046 - root - INFO - --- Minibock is ignored
+2023-01-23 09:57:51,046 - root - INFO - inner_street_l:          539.4677118128158
+2023-01-23 09:57:51,046 - root - INFO - max_l_inner_streets:     1280.0
+2023-01-23 09:57:51,046 - root - INFO - min_l_inner_streets:     160.0
+2023-01-23 09:57:51,046 - root - INFO - outer_cycle_length:      0
+2023-01-23 09:57:51,046 - root - INFO - max_l_outer:             2560.0
+2023-01-23 09:57:51,046 - root - INFO - min_l_outer:             426.667
+2023-01-23 09:57:51,046 - root - INFO - path_crit:               0
+2023-01-23 09:57:51,046 - root - INFO - average_GFA_den:         0.5056830916636573
+2023-01-23 09:57:51,046 - root - INFO - average_pop_den:         0.0
+2023-01-23 09:57:51,048 - shapely.geos - INFO - Ring Self-intersection at or near point 797869.55512132077 5826772.4523496758
+2023-01-23 09:57:51,049 - root - INFO -  
+2023-01-23 09:57:51,049 - root - INFO - --- Minibock is ignored
+2023-01-23 09:57:51,049 - root - INFO - inner_street_l:          463.3723108592696
+2023-01-23 09:57:51,049 - root - INFO - max_l_inner_streets:     1280.0
+2023-01-23 09:57:51,049 - root - INFO - min_l_inner_streets:     160.0
+2023-01-23 09:57:51,049 - root - INFO - outer_cycle_length:      0
+2023-01-23 09:57:51,049 - root - INFO - max_l_outer:             2560.0
+2023-01-23 09:57:51,049 - root - INFO - min_l_outer:             426.667
+2023-01-23 09:57:51,049 - root - INFO - path_crit:               0
+2023-01-23 09:57:51,049 - root - INFO - average_GFA_den:         0.33301282417926703
+2023-01-23 09:57:51,049 - root - INFO - average_pop_den:         0.0
+2023-01-23 09:57:51,056 - shapely.geos - INFO - Ring Self-intersection at or near point 797872.19096621987 5826757.1172115151
+2023-01-23 09:57:51,057 - root - INFO -  
+2023-01-23 09:57:51,057 - root - INFO - --- Minibock is ignored
+2023-01-23 09:57:51,057 - root - INFO - inner_street_l:          410.6937850401261
+2023-01-23 09:57:51,057 - root - INFO - max_l_inner_streets:     1280.0
+2023-01-23 09:57:51,057 - root - INFO - min_l_inner_streets:     160.0
+2023-01-23 09:57:51,057 - root - INFO - outer_cycle_length:      0
+2023-01-23 09:57:51,057 - root - INFO - max_l_outer:             2560.0
+2023-01-23 09:57:51,057 - root - INFO - min_l_outer:             426.667
+2023-01-23 09:57:51,057 - root - INFO - path_crit:               0
+2023-01-23 09:57:51,057 - root - INFO - average_GFA_den:         0.5438911077434158
+2023-01-23 09:57:51,057 - root - INFO - average_pop_den:         0.0
+2023-01-23 09:57:51,059 - shapely.geos - INFO - Ring Self-intersection at or near point 798348.61537191272 5826743.1326908264
+2023-01-23 09:57:51,060 - root - INFO -  
+2023-01-23 09:57:51,060 - root - INFO - --- Minibock is ignored
+2023-01-23 09:57:51,060 - root - INFO - inner_street_l:          362.3884280979029
+2023-01-23 09:57:51,060 - root - INFO - max_l_inner_streets:     1280.0
+2023-01-23 09:57:51,060 - root - INFO - min_l_inner_streets:     160.0
+2023-01-23 09:57:51,060 - root - INFO - outer_cycle_length:      0
+2023-01-23 09:57:51,060 - root - INFO - max_l_outer:             2560.0
+2023-01-23 09:57:51,060 - root - INFO - min_l_outer:             426.667
+2023-01-23 09:57:51,060 - root - INFO - path_crit:               0
+2023-01-23 09:57:51,060 - root - INFO - average_GFA_den:         0.4347814466787253
+2023-01-23 09:57:51,060 - root - INFO - average_pop_den:         0.0
+2023-01-23 09:57:51,067 - shapely.geos - INFO - Ring Self-intersection at or near point 797377.12439302169 5827734.7999321986
+2023-01-23 09:57:51,067 - root - INFO -  
+2023-01-23 09:57:51,068 - root - INFO - --- Minibock is ignored
+2023-01-23 09:57:51,068 - root - INFO - inner_street_l:          543.4004322725306
+2023-01-23 09:57:51,068 - root - INFO - max_l_inner_streets:     1280.0
+2023-01-23 09:57:51,068 - root - INFO - min_l_inner_streets:     160.0
+2023-01-23 09:57:51,068 - root - INFO - outer_cycle_length:      0
+2023-01-23 09:57:51,068 - root - INFO - max_l_outer:             2560.0
+2023-01-23 09:57:51,068 - root - INFO - min_l_outer:             426.667
+2023-01-23 09:57:51,068 - root - INFO - path_crit:               0
+2023-01-23 09:57:51,068 - root - INFO - average_GFA_den:         0.2726388411307276
+2023-01-23 09:57:51,068 - root - INFO - average_pop_den:         0.0
+2023-01-23 09:57:51,070 - shapely.geos - INFO - Ring Self-intersection at or near point 797513.29483566014 5827579.4610265996
+2023-01-23 09:57:51,070 - root - INFO -  
+2023-01-23 09:57:51,070 - root - INFO - --- Minibock is ignored
+2023-01-23 09:57:51,070 - root - INFO - inner_street_l:          299.55698189300847
+2023-01-23 09:57:51,070 - root - INFO - max_l_inner_streets:     1280.0
+2023-01-23 09:57:51,070 - root - INFO - min_l_inner_streets:     160.0
+2023-01-23 09:57:51,071 - root - INFO - outer_cycle_length:      0
+2023-01-23 09:57:51,071 - root - INFO - max_l_outer:             2560.0
+2023-01-23 09:57:51,071 - root - INFO - min_l_outer:             426.667
+2023-01-23 09:57:51,071 - root - INFO - path_crit:               0
+2023-01-23 09:57:51,071 - root - INFO - average_GFA_den:         0.4236702151765583
+2023-01-23 09:57:51,071 - root - INFO - average_pop_den:         0.0
+2023-01-23 09:57:51,082 - root - INFO -  
+2023-01-23 09:57:51,082 - root - INFO - --- Minibock is ignored
+2023-01-23 09:57:51,082 - root - INFO - inner_street_l:          296.4794615961707
+2023-01-23 09:57:51,082 - root - INFO - max_l_inner_streets:     1280.0
+2023-01-23 09:57:51,082 - root - INFO - min_l_inner_streets:     160.0
+2023-01-23 09:57:51,082 - root - INFO - outer_cycle_length:      1323.8888367323111
+2023-01-23 09:57:51,082 - root - INFO - max_l_outer:             2560.0
+2023-01-23 09:57:51,082 - root - INFO - min_l_outer:             426.667
+2023-01-23 09:57:51,082 - root - INFO - path_crit:               True
+2023-01-23 09:57:51,082 - root - INFO - average_GFA_den:         0.29960065994134283
+2023-01-23 09:57:51,082 - root - INFO - average_pop_den:         0.0
+2023-01-23 09:57:51,089 - shapely.geos - INFO - Ring Self-intersection at or near point 797282.28013953858 5827718.5334799541
+2023-01-23 09:57:51,090 - root - INFO -  
+2023-01-23 09:57:51,090 - root - INFO - --- Minibock is ignored
+2023-01-23 09:57:51,090 - root - INFO - inner_street_l:          421.91352763126304
+2023-01-23 09:57:51,090 - root - INFO - max_l_inner_streets:     1280.0
+2023-01-23 09:57:51,090 - root - INFO - min_l_inner_streets:     160.0
+2023-01-23 09:57:51,090 - root - INFO - outer_cycle_length:      0
+2023-01-23 09:57:51,090 - root - INFO - max_l_outer:             2560.0
+2023-01-23 09:57:51,090 - root - INFO - min_l_outer:             426.667
+2023-01-23 09:57:51,090 - root - INFO - path_crit:               0
+2023-01-23 09:57:51,090 - root - INFO - average_GFA_den:         0.09951841315283642
+2023-01-23 09:57:51,090 - root - INFO - average_pop_den:         1723.96634
+2023-01-23 09:57:51,092 - shapely.geos - INFO - Ring Self-intersection at or near point 797348.96145921806 5827038.2516963575
+2023-01-23 09:57:51,093 - root - INFO -  
+2023-01-23 09:57:51,093 - root - INFO - --- Minibock is ignored
+2023-01-23 09:57:51,093 - root - INFO - inner_street_l:          996.0990217801523
+2023-01-23 09:57:51,093 - root - INFO - max_l_inner_streets:     1280.0
+2023-01-23 09:57:51,093 - root - INFO - min_l_inner_streets:     160.0
+2023-01-23 09:57:51,093 - root - INFO - outer_cycle_length:      0
+2023-01-23 09:57:51,093 - root - INFO - max_l_outer:             2560.0
+2023-01-23 09:57:51,093 - root - INFO - min_l_outer:             426.667
+2023-01-23 09:57:51,093 - root - INFO - path_crit:               0
+2023-01-23 09:57:51,093 - root - INFO - average_GFA_den:         0.19566800719462443
+2023-01-23 09:57:51,093 - root - INFO - average_pop_den:         0.0
+2023-01-23 09:57:51,100 - shapely.geos - INFO - Ring Self-intersection at or near point 797393.87381676142 5826997.7874799799
+2023-01-23 09:57:51,101 - root - INFO -  
+2023-01-23 09:57:51,101 - root - INFO - --- Minibock is ignored
+2023-01-23 09:57:51,101 - root - INFO - inner_street_l:          364.5529938064212
+2023-01-23 09:57:51,101 - root - INFO - max_l_inner_streets:     1280.0
+2023-01-23 09:57:51,101 - root - INFO - min_l_inner_streets:     160.0
+2023-01-23 09:57:51,101 - root - INFO - outer_cycle_length:      0
+2023-01-23 09:57:51,101 - root - INFO - max_l_outer:             2560.0
+2023-01-23 09:57:51,101 - root - INFO - min_l_outer:             426.667
+2023-01-23 09:57:51,101 - root - INFO - path_crit:               0
+2023-01-23 09:57:51,101 - root - INFO - average_GFA_den:         0.3731044000737244
+2023-01-23 09:57:51,101 - root - INFO - average_pop_den:         0.0
+2023-01-23 09:57:51,103 - shapely.geos - INFO - Ring Self-intersection at or near point 797643.74796521303 5826900.7961469479
+2023-01-23 09:57:51,104 - root - INFO -  
+2023-01-23 09:57:51,104 - root - INFO - --- Minibock is ignored
+2023-01-23 09:57:51,104 - root - INFO - inner_street_l:          921.6577129739767
+2023-01-23 09:57:51,104 - root - INFO - max_l_inner_streets:     1280.0
+2023-01-23 09:57:51,104 - root - INFO - min_l_inner_streets:     160.0
+2023-01-23 09:57:51,104 - root - INFO - outer_cycle_length:      0
+2023-01-23 09:57:51,104 - root - INFO - max_l_outer:             2560.0
+2023-01-23 09:57:51,104 - root - INFO - min_l_outer:             426.667
+2023-01-23 09:57:51,104 - root - INFO - path_crit:               0
+2023-01-23 09:57:51,104 - root - INFO - average_GFA_den:         0.4326004101567705
+2023-01-23 09:57:51,104 - root - INFO - average_pop_den:         0.0
+2023-01-23 09:57:51,107 - shapely.geos - INFO - Ring Self-intersection at or near point 797369.25833334099 5827059.8455995508
+2023-01-23 09:57:51,108 - root - INFO -  
+2023-01-23 09:57:51,108 - root - INFO - --- Minibock is ignored
+2023-01-23 09:57:51,108 - root - INFO - inner_street_l:          612.5590429908341
+2023-01-23 09:57:51,108 - root - INFO - max_l_inner_streets:     1280.0
+2023-01-23 09:57:51,108 - root - INFO - min_l_inner_streets:     160.0
+2023-01-23 09:57:51,108 - root - INFO - outer_cycle_length:      0
+2023-01-23 09:57:51,108 - root - INFO - max_l_outer:             2560.0
+2023-01-23 09:57:51,108 - root - INFO - min_l_outer:             426.667
+2023-01-23 09:57:51,108 - root - INFO - path_crit:               0
+2023-01-23 09:57:51,108 - root - INFO - average_GFA_den:         0.21883139604940116
+2023-01-23 09:57:51,108 - root - INFO - average_pop_den:         0.0
+2023-01-23 09:57:51,110 - shapely.geos - INFO - Ring Self-intersection at or near point 797537.49654513644 5827111.42437902
+2023-01-23 09:57:51,111 - root - INFO -  
+2023-01-23 09:57:51,111 - root - INFO - --- Minibock is ignored
+2023-01-23 09:57:51,111 - root - INFO - inner_street_l:          489.8054545688111
+2023-01-23 09:57:51,111 - root - INFO - max_l_inner_streets:     1280.0
+2023-01-23 09:57:51,111 - root - INFO - min_l_inner_streets:     160.0
+2023-01-23 09:57:51,111 - root - INFO - outer_cycle_length:      0
+2023-01-23 09:57:51,111 - root - INFO - max_l_outer:             2560.0
+2023-01-23 09:57:51,111 - root - INFO - min_l_outer:             426.667
+2023-01-23 09:57:51,111 - root - INFO - path_crit:               0
+2023-01-23 09:57:51,111 - root - INFO - average_GFA_den:         0.6123384537529345
+2023-01-23 09:57:51,111 - root - INFO - average_pop_den:         0.0
+2023-01-23 09:57:51,113 - shapely.geos - INFO - Ring Self-intersection at or near point 797588.38701942051 5827016.3713820875
+2023-01-23 09:57:51,114 - root - INFO -  
+2023-01-23 09:57:51,114 - root - INFO - --- Minibock is ignored
+2023-01-23 09:57:51,114 - root - INFO - inner_street_l:          249.49545058044632
+2023-01-23 09:57:51,114 - root - INFO - max_l_inner_streets:     1280.0
+2023-01-23 09:57:51,114 - root - INFO - min_l_inner_streets:     160.0
+2023-01-23 09:57:51,114 - root - INFO - outer_cycle_length:      0
+2023-01-23 09:57:51,114 - root - INFO - max_l_outer:             2560.0
+2023-01-23 09:57:51,114 - root - INFO - min_l_outer:             426.667
+2023-01-23 09:57:51,114 - root - INFO - path_crit:               0
+2023-01-23 09:57:51,114 - root - INFO - average_GFA_den:         0.6498524851341292
+2023-01-23 09:57:51,114 - root - INFO - average_pop_den:         1784.44522
+2023-01-23 09:57:51,116 - shapely.geos - INFO - Ring Self-intersection at or near point 797482.25018527289 5826991.605953454
+2023-01-23 09:57:51,117 - root - INFO -  
+2023-01-23 09:57:51,117 - root - INFO - --- Minibock is ignored
+2023-01-23 09:57:51,117 - root - INFO - inner_street_l:          202.8797514860101
+2023-01-23 09:57:51,117 - root - INFO - max_l_inner_streets:     1280.0
+2023-01-23 09:57:51,117 - root - INFO - min_l_inner_streets:     160.0
+2023-01-23 09:57:51,117 - root - INFO - outer_cycle_length:      0
+2023-01-23 09:57:51,117 - root - INFO - max_l_outer:             2560.0
+2023-01-23 09:57:51,117 - root - INFO - min_l_outer:             426.667
+2023-01-23 09:57:51,117 - root - INFO - path_crit:               0
+2023-01-23 09:57:51,117 - root - INFO - average_GFA_den:         0.40110730150397395
+2023-01-23 09:57:51,117 - root - INFO - average_pop_den:         1784.44522
+2023-01-23 09:57:51,119 - shapely.geos - INFO - Ring Self-intersection at or near point 797478.43050091923 5827000.6887697577
+2023-01-23 09:57:51,120 - root - INFO -  
+2023-01-23 09:57:51,120 - root - INFO - --- Minibock is ignored
+2023-01-23 09:57:51,120 - root - INFO - inner_street_l:          202.4935597388001
+2023-01-23 09:57:51,120 - root - INFO - max_l_inner_streets:     1280.0
+2023-01-23 09:57:51,120 - root - INFO - min_l_inner_streets:     160.0
+2023-01-23 09:57:51,120 - root - INFO - outer_cycle_length:      0
+2023-01-23 09:57:51,120 - root - INFO - max_l_outer:             2560.0
+2023-01-23 09:57:51,120 - root - INFO - min_l_outer:             426.667
+2023-01-23 09:57:51,120 - root - INFO - path_crit:               0
+2023-01-23 09:57:51,120 - root - INFO - average_GFA_den:         0.3932362975580597
+2023-01-23 09:57:51,120 - root - INFO - average_pop_den:         0.0
+2023-01-23 09:57:51,122 - shapely.geos - INFO - Ring Self-intersection at or near point 797482.25018527289 5826991.605953454
+2023-01-23 09:57:51,123 - root - INFO -  
+2023-01-23 09:57:51,123 - root - INFO - --- Minibock is ignored
+2023-01-23 09:57:51,123 - root - INFO - inner_street_l:          169.53205541895198
+2023-01-23 09:57:51,123 - root - INFO - max_l_inner_streets:     1280.0
+2023-01-23 09:57:51,123 - root - INFO - min_l_inner_streets:     160.0
+2023-01-23 09:57:51,123 - root - INFO - outer_cycle_length:      0
+2023-01-23 09:57:51,123 - root - INFO - max_l_outer:             2560.0
+2023-01-23 09:57:51,123 - root - INFO - min_l_outer:             426.667
+2023-01-23 09:57:51,123 - root - INFO - path_crit:               0
+2023-01-23 09:57:51,123 - root - INFO - average_GFA_den:         0.36620547225526634
+2023-01-23 09:57:51,123 - root - INFO - average_pop_den:         1784.44522
+2023-01-23 09:57:51,125 - shapely.geos - INFO - Ring Self-intersection at or near point 797761.00072945305 5827250.0334979976
+2023-01-23 09:57:51,126 - root - INFO -  
+2023-01-23 09:57:51,126 - root - INFO - --- Minibock is ignored
+2023-01-23 09:57:51,126 - root - INFO - inner_street_l:          402.39563998808325
+2023-01-23 09:57:51,126 - root - INFO - max_l_inner_streets:     1280.0
+2023-01-23 09:57:51,126 - root - INFO - min_l_inner_streets:     160.0
+2023-01-23 09:57:51,126 - root - INFO - outer_cycle_length:      0
+2023-01-23 09:57:51,127 - root - INFO - max_l_outer:             2560.0
+2023-01-23 09:57:51,127 - root - INFO - min_l_outer:             426.667
+2023-01-23 09:57:51,127 - root - INFO - path_crit:               0
+2023-01-23 09:57:51,127 - root - INFO - average_GFA_den:         0.6965735555551669
+2023-01-23 09:57:51,127 - root - INFO - average_pop_den:         0.0
+2023-01-23 09:57:51,151 - shapely.geos - INFO - Ring Self-intersection at or near point 797792.30541352881 5827254.0039737895
+2023-01-23 09:57:51,152 - root - INFO -  
+2023-01-23 09:57:51,152 - root - INFO - --- Minibock is ignored
+2023-01-23 09:57:51,152 - root - INFO - inner_street_l:          328.3337438177556
+2023-01-23 09:57:51,152 - root - INFO - max_l_inner_streets:     1280.0
+2023-01-23 09:57:51,152 - root - INFO - min_l_inner_streets:     160.0
+2023-01-23 09:57:51,152 - root - INFO - outer_cycle_length:      0
+2023-01-23 09:57:51,152 - root - INFO - max_l_outer:             2560.0
+2023-01-23 09:57:51,152 - root - INFO - min_l_outer:             426.667
+2023-01-23 09:57:51,152 - root - INFO - path_crit:               0
+2023-01-23 09:57:51,152 - root - INFO - average_GFA_den:         0.5282144196160781
+2023-01-23 09:57:51,152 - root - INFO - average_pop_den:         0.0
+2023-01-23 09:57:51,154 - shapely.geos - INFO - Ring Self-intersection at or near point 797827.70904439187 5826860.4790853551
+2023-01-23 09:57:51,155 - root - INFO -  
+2023-01-23 09:57:51,155 - root - INFO - --- Minibock is ignored
+2023-01-23 09:57:51,155 - root - INFO - inner_street_l:          405.99223511879023
+2023-01-23 09:57:51,155 - root - INFO - max_l_inner_streets:     1280.0
+2023-01-23 09:57:51,155 - root - INFO - min_l_inner_streets:     160.0
+2023-01-23 09:57:51,155 - root - INFO - outer_cycle_length:      0
+2023-01-23 09:57:51,155 - root - INFO - max_l_outer:             2560.0
+2023-01-23 09:57:51,155 - root - INFO - min_l_outer:             426.667
+2023-01-23 09:57:51,155 - root - INFO - path_crit:               0
+2023-01-23 09:57:51,155 - root - INFO - average_GFA_den:         0.33159684708645115
+2023-01-23 09:57:51,155 - root - INFO - average_pop_den:         0.0
+2023-01-23 09:57:51,157 - shapely.geos - INFO - Ring Self-intersection at or near point 797792.30541352881 5827254.0039737895
+2023-01-23 09:57:51,158 - root - INFO -  
+2023-01-23 09:57:51,158 - root - INFO - --- Minibock is ignored
+2023-01-23 09:57:51,158 - root - INFO - inner_street_l:          328.8807348664006
+2023-01-23 09:57:51,158 - root - INFO - max_l_inner_streets:     1280.0
+2023-01-23 09:57:51,158 - root - INFO - min_l_inner_streets:     160.0
+2023-01-23 09:57:51,158 - root - INFO - outer_cycle_length:      0
+2023-01-23 09:57:51,158 - root - INFO - max_l_outer:             2560.0
+2023-01-23 09:57:51,158 - root - INFO - min_l_outer:             426.667
+2023-01-23 09:57:51,158 - root - INFO - path_crit:               0
+2023-01-23 09:57:51,158 - root - INFO - average_GFA_den:         0.5439774133065527
+2023-01-23 09:57:51,158 - root - INFO - average_pop_den:         0.0
+2023-01-23 09:57:51,170 - shapely.geos - INFO - Ring Self-intersection at or near point 797915.61791542545 5827374.9955129139
+2023-01-23 09:57:51,171 - root - INFO -  
+2023-01-23 09:57:51,171 - root - INFO - --- Minibock is ignored
+2023-01-23 09:57:51,171 - root - INFO - inner_street_l:          404.5264503751682
+2023-01-23 09:57:51,171 - root - INFO - max_l_inner_streets:     1280.0
+2023-01-23 09:57:51,171 - root - INFO - min_l_inner_streets:     160.0
+2023-01-23 09:57:51,171 - root - INFO - outer_cycle_length:      0
+2023-01-23 09:57:51,171 - root - INFO - max_l_outer:             2560.0
+2023-01-23 09:57:51,171 - root - INFO - min_l_outer:             426.667
+2023-01-23 09:57:51,171 - root - INFO - path_crit:               0
+2023-01-23 09:57:51,171 - root - INFO - average_GFA_den:         0.46947899178779745
+2023-01-23 09:57:51,171 - root - INFO - average_pop_den:         0.0
+2023-01-23 09:57:51,184 - shapely.geos - INFO - Ring Self-intersection at or near point 797705.7636250928 5827789.1413346203
+2023-01-23 09:57:51,185 - root - INFO -  
+2023-01-23 09:57:51,185 - root - INFO - --- Minibock is ignored
+2023-01-23 09:57:51,185 - root - INFO - inner_street_l:          311.61317465715825
+2023-01-23 09:57:51,185 - root - INFO - max_l_inner_streets:     1280.0
+2023-01-23 09:57:51,185 - root - INFO - min_l_inner_streets:     160.0
+2023-01-23 09:57:51,185 - root - INFO - outer_cycle_length:      0
+2023-01-23 09:57:51,185 - root - INFO - max_l_outer:             2560.0
+2023-01-23 09:57:51,185 - root - INFO - min_l_outer:             426.667
+2023-01-23 09:57:51,185 - root - INFO - path_crit:               0
+2023-01-23 09:57:51,185 - root - INFO - average_GFA_den:         0.7666409184928062
+2023-01-23 09:57:51,185 - root - INFO - average_pop_den:         0.0
+2023-01-23 09:57:51,190 - root - INFO -  
+2023-01-23 09:57:51,190 - root - INFO - --- Minibock is ignored
+2023-01-23 09:57:51,190 - root - INFO - inner_street_l:          285.9056905476788
+2023-01-23 09:57:51,190 - root - INFO - max_l_inner_streets:     1280.0
+2023-01-23 09:57:51,190 - root - INFO - min_l_inner_streets:     160.0
+2023-01-23 09:57:51,190 - root - INFO - outer_cycle_length:      1121.4996159221669
+2023-01-23 09:57:51,190 - root - INFO - max_l_outer:             2560.0
+2023-01-23 09:57:51,190 - root - INFO - min_l_outer:             426.667
+2023-01-23 09:57:51,190 - root - INFO - path_crit:               True
+2023-01-23 09:57:51,190 - root - INFO - average_GFA_den:         0.26723589758114485
+2023-01-23 09:57:51,190 - root - INFO - average_pop_den:         0.0
+2023-01-23 09:57:51,192 - shapely.geos - INFO - Ring Self-intersection at or near point 797478.81869777781 5827879.8232572023
+2023-01-23 09:57:51,193 - root - INFO -  
+2023-01-23 09:57:51,193 - root - INFO - --- Minibock is ignored
+2023-01-23 09:57:51,193 - root - INFO - inner_street_l:          344.2648409738681
+2023-01-23 09:57:51,193 - root - INFO - max_l_inner_streets:     1280.0
+2023-01-23 09:57:51,193 - root - INFO - min_l_inner_streets:     160.0
+2023-01-23 09:57:51,193 - root - INFO - outer_cycle_length:      0
+2023-01-23 09:57:51,193 - root - INFO - max_l_outer:             2560.0
+2023-01-23 09:57:51,193 - root - INFO - min_l_outer:             426.667
+2023-01-23 09:57:51,193 - root - INFO - path_crit:               0
+2023-01-23 09:57:51,193 - root - INFO - average_GFA_den:         0.7913736348506513
+2023-01-23 09:57:51,193 - root - INFO - average_pop_den:         1723.96634
+2023-01-23 09:57:51,226 - shapely.geos - INFO - Ring Self-intersection at or near point 798066.71867088543 5827199.1595828794
+2023-01-23 09:57:51,227 - root - INFO -  
+2023-01-23 09:57:51,227 - root - INFO - --- Minibock is ignored
+2023-01-23 09:57:51,228 - root - INFO - inner_street_l:          517.374085981168
+2023-01-23 09:57:51,228 - root - INFO - max_l_inner_streets:     1280.0
+2023-01-23 09:57:51,228 - root - INFO - min_l_inner_streets:     160.0
+2023-01-23 09:57:51,228 - root - INFO - outer_cycle_length:      0
+2023-01-23 09:57:51,228 - root - INFO - max_l_outer:             2560.0
+2023-01-23 09:57:51,228 - root - INFO - min_l_outer:             426.667
+2023-01-23 09:57:51,228 - root - INFO - path_crit:               0
+2023-01-23 09:57:51,228 - root - INFO - average_GFA_den:         0.4640186209298995
+2023-01-23 09:57:51,228 - root - INFO - average_pop_den:         0.0
+2023-01-23 09:57:51,230 - shapely.geos - INFO - Ring Self-intersection at or near point 798082.68704290816 5827099.8958095498
+2023-01-23 09:57:51,230 - root - INFO -  
+2023-01-23 09:57:51,230 - root - INFO - --- Minibock is ignored
+2023-01-23 09:57:51,230 - root - INFO - inner_street_l:          379.79975873620117
+2023-01-23 09:57:51,230 - root - INFO - max_l_inner_streets:     1280.0
+2023-01-23 09:57:51,231 - root - INFO - min_l_inner_streets:     160.0
+2023-01-23 09:57:51,231 - root - INFO - outer_cycle_length:      0
+2023-01-23 09:57:51,231 - root - INFO - max_l_outer:             2560.0
+2023-01-23 09:57:51,231 - root - INFO - min_l_outer:             426.667
+2023-01-23 09:57:51,231 - root - INFO - path_crit:               0
+2023-01-23 09:57:51,231 - root - INFO - average_GFA_den:         0.3267056384333968
+2023-01-23 09:57:51,231 - root - INFO - average_pop_den:         0.0
+2023-01-23 09:57:51,238 - shapely.geos - INFO - Ring Self-intersection at or near point 798447.77421185561 5827211.5945873205
+2023-01-23 09:57:51,243 - shapely.geos - INFO - Self-intersection at or near point 798447.77421185561 5827211.5945873205
+2023-01-23 09:57:51,244 - root - INFO -  
+2023-01-23 09:57:51,244 - root - INFO - --- Minibock is ignored
+2023-01-23 09:57:51,244 - root - INFO - inner_street_l:          301.3857779886199
+2023-01-23 09:57:51,244 - root - INFO - max_l_inner_streets:     1280.0
+2023-01-23 09:57:51,244 - root - INFO - min_l_inner_streets:     160.0
+2023-01-23 09:57:51,244 - root - INFO - outer_cycle_length:      0
+2023-01-23 09:57:51,244 - root - INFO - max_l_outer:             2560.0
+2023-01-23 09:57:51,244 - root - INFO - min_l_outer:             426.667
+2023-01-23 09:57:51,244 - root - INFO - path_crit:               0
+2023-01-23 09:57:51,244 - root - INFO - average_GFA_den:         0.35028547521065556
+2023-01-23 09:57:51,244 - root - INFO - average_pop_den:         0.0
+2023-01-23 09:57:51,252 - shapely.geos - INFO - Ring Self-intersection at or near point 798082.68704290816 5827099.8958095498
+2023-01-23 09:57:51,253 - root - INFO -  
+2023-01-23 09:57:51,253 - root - INFO - --- Minibock is ignored
+2023-01-23 09:57:51,253 - root - INFO - inner_street_l:          376.8105620151779
+2023-01-23 09:57:51,253 - root - INFO - max_l_inner_streets:     1280.0
+2023-01-23 09:57:51,253 - root - INFO - min_l_inner_streets:     160.0
+2023-01-23 09:57:51,253 - root - INFO - outer_cycle_length:      0
+2023-01-23 09:57:51,253 - root - INFO - max_l_outer:             2560.0
+2023-01-23 09:57:51,253 - root - INFO - min_l_outer:             426.667
+2023-01-23 09:57:51,253 - root - INFO - path_crit:               0
+2023-01-23 09:57:51,253 - root - INFO - average_GFA_den:         0.4579335156980843
+2023-01-23 09:57:51,253 - root - INFO - average_pop_den:         0.0
+2023-01-23 09:57:51,255 - shapely.geos - INFO - Ring Self-intersection at or near point 798518.96426299505 5827181.9031814532
+2023-01-23 09:57:51,256 - root - INFO -  
+2023-01-23 09:57:51,256 - root - INFO - --- Minibock is ignored
+2023-01-23 09:57:51,256 - root - INFO - inner_street_l:          255.50229324195212
+2023-01-23 09:57:51,256 - root - INFO - max_l_inner_streets:     1280.0
+2023-01-23 09:57:51,256 - root - INFO - min_l_inner_streets:     160.0
+2023-01-23 09:57:51,256 - root - INFO - outer_cycle_length:      0
+2023-01-23 09:57:51,256 - root - INFO - max_l_outer:             2560.0
+2023-01-23 09:57:51,256 - root - INFO - min_l_outer:             426.667
+2023-01-23 09:57:51,256 - root - INFO - path_crit:               0
+2023-01-23 09:57:51,256 - root - INFO - average_GFA_den:         0.46847685489550817
+2023-01-23 09:57:51,256 - root - INFO - average_pop_den:         0.0
+2023-01-23 09:57:51,258 - shapely.geos - INFO - Ring Self-intersection at or near point 798331.78428777424 5827216.2185624288
+2023-01-23 09:57:51,259 - root - INFO -  
+2023-01-23 09:57:51,259 - root - INFO - --- Minibock is ignored
+2023-01-23 09:57:51,259 - root - INFO - inner_street_l:          414.5308888948215
+2023-01-23 09:57:51,259 - root - INFO - max_l_inner_streets:     1280.0
+2023-01-23 09:57:51,259 - root - INFO - min_l_inner_streets:     160.0
+2023-01-23 09:57:51,259 - root - INFO - outer_cycle_length:      0
+2023-01-23 09:57:51,259 - root - INFO - max_l_outer:             2560.0
+2023-01-23 09:57:51,259 - root - INFO - min_l_outer:             426.667
+2023-01-23 09:57:51,259 - root - INFO - path_crit:               0
+2023-01-23 09:57:51,259 - root - INFO - average_GFA_den:         0.10651069242612352
+2023-01-23 09:57:51,259 - root - INFO - average_pop_den:         1693.40859
+2023-01-23 09:57:51,261 - shapely.geos - INFO - Ring Self-intersection at or near point 798391.4707624563 5827177.4898492787
+2023-01-23 09:57:51,262 - root - INFO -  
+2023-01-23 09:57:51,262 - root - INFO - --- Minibock is ignored
+2023-01-23 09:57:51,262 - root - INFO - inner_street_l:          271.0313114111157
+2023-01-23 09:57:51,262 - root - INFO - max_l_inner_streets:     1280.0
+2023-01-23 09:57:51,262 - root - INFO - min_l_inner_streets:     160.0
+2023-01-23 09:57:51,262 - root - INFO - outer_cycle_length:      0
+2023-01-23 09:57:51,262 - root - INFO - max_l_outer:             2560.0
+2023-01-23 09:57:51,262 - root - INFO - min_l_outer:             426.667
+2023-01-23 09:57:51,262 - root - INFO - path_crit:               0
+2023-01-23 09:57:51,262 - root - INFO - average_GFA_den:         0.4539470333281947
+2023-01-23 09:57:51,262 - root - INFO - average_pop_den:         0.0
+2023-01-23 09:57:51,264 - shapely.geos - INFO - Ring Self-intersection at or near point 798447.77421185561 5827211.5945873205
+2023-01-23 09:57:51,265 - root - INFO -  
+2023-01-23 09:57:51,265 - root - INFO - --- Minibock is ignored
+2023-01-23 09:57:51,265 - root - INFO - inner_street_l:          270.3327708427272
+2023-01-23 09:57:51,265 - root - INFO - max_l_inner_streets:     1280.0
+2023-01-23 09:57:51,265 - root - INFO - min_l_inner_streets:     160.0
+2023-01-23 09:57:51,265 - root - INFO - outer_cycle_length:      0
+2023-01-23 09:57:51,265 - root - INFO - max_l_outer:             2560.0
+2023-01-23 09:57:51,265 - root - INFO - min_l_outer:             426.667
+2023-01-23 09:57:51,265 - root - INFO - path_crit:               0
+2023-01-23 09:57:51,265 - root - INFO - average_GFA_den:         0.5872124789128526
+2023-01-23 09:57:51,265 - root - INFO - average_pop_den:         0.0
+2023-01-23 09:57:51,267 - shapely.geos - INFO - Ring Self-intersection at or near point 798584.5367926677 5827156.1647983361
+2023-01-23 09:57:51,268 - root - INFO -  
+2023-01-23 09:57:51,268 - root - INFO - --- Minibock is ignored
+2023-01-23 09:57:51,268 - root - INFO - inner_street_l:          390.6135614033916
+2023-01-23 09:57:51,268 - root - INFO - max_l_inner_streets:     1280.0
+2023-01-23 09:57:51,268 - root - INFO - min_l_inner_streets:     160.0
+2023-01-23 09:57:51,268 - root - INFO - outer_cycle_length:      0
+2023-01-23 09:57:51,268 - root - INFO - max_l_outer:             2560.0
+2023-01-23 09:57:51,268 - root - INFO - min_l_outer:             426.667
+2023-01-23 09:57:51,268 - root - INFO - path_crit:               0
+2023-01-23 09:57:51,268 - root - INFO - average_GFA_den:         0.26051081795339914
+2023-01-23 09:57:51,268 - root - INFO - average_pop_den:         0.0
+2023-01-23 09:57:51,286 - shapely.geos - INFO - Ring Self-intersection at or near point 798268.53716661804 5827525.5119744223
+2023-01-23 09:57:51,287 - root - INFO -  
+2023-01-23 09:57:51,287 - root - INFO - --- Minibock is ignored
+2023-01-23 09:57:51,287 - root - INFO - inner_street_l:          490.7989844584448
+2023-01-23 09:57:51,287 - root - INFO - max_l_inner_streets:     1280.0
+2023-01-23 09:57:51,287 - root - INFO - min_l_inner_streets:     160.0
+2023-01-23 09:57:51,287 - root - INFO - outer_cycle_length:      0
+2023-01-23 09:57:51,287 - root - INFO - max_l_outer:             2560.0
+2023-01-23 09:57:51,287 - root - INFO - min_l_outer:             426.667
+2023-01-23 09:57:51,287 - root - INFO - path_crit:               0
+2023-01-23 09:57:51,287 - root - INFO - average_GFA_den:         0.4377334637828056
+2023-01-23 09:57:51,287 - root - INFO - average_pop_den:         0.0
+2023-01-23 09:57:51,289 - shapely.geos - INFO - Ring Self-intersection at or near point 797869.55512132077 5826772.4523496758
+2023-01-23 09:57:51,290 - root - INFO -  
+2023-01-23 09:57:51,290 - root - INFO - --- Minibock is ignored
+2023-01-23 09:57:51,290 - root - INFO - inner_street_l:          463.3723108592696
+2023-01-23 09:57:51,290 - root - INFO - max_l_inner_streets:     1280.0
+2023-01-23 09:57:51,290 - root - INFO - min_l_inner_streets:     160.0
+2023-01-23 09:57:51,290 - root - INFO - outer_cycle_length:      0
+2023-01-23 09:57:51,290 - root - INFO - max_l_outer:             2560.0
+2023-01-23 09:57:51,290 - root - INFO - min_l_outer:             426.667
+2023-01-23 09:57:51,290 - root - INFO - path_crit:               0
+2023-01-23 09:57:51,290 - root - INFO - average_GFA_den:         0.33301282417926703
+2023-01-23 09:57:51,290 - root - INFO - average_pop_den:         0.0
+2023-01-23 09:57:51,302 - shapely.geos - INFO - Ring Self-intersection at or near point 797393.87381676142 5826997.7874799799
+2023-01-23 09:57:51,304 - root - INFO -  
+2023-01-23 09:57:51,304 - root - INFO - --- Minibock is ignored
+2023-01-23 09:57:51,304 - root - INFO - inner_street_l:          364.5529938064212
+2023-01-23 09:57:51,304 - root - INFO - max_l_inner_streets:     1280.0
+2023-01-23 09:57:51,304 - root - INFO - min_l_inner_streets:     160.0
+2023-01-23 09:57:51,304 - root - INFO - outer_cycle_length:      0
+2023-01-23 09:57:51,304 - root - INFO - max_l_outer:             2560.0
+2023-01-23 09:57:51,304 - root - INFO - min_l_outer:             426.667
+2023-01-23 09:57:51,304 - root - INFO - path_crit:               0
+2023-01-23 09:57:51,304 - root - INFO - average_GFA_den:         0.3731044000737244
+2023-01-23 09:57:51,304 - root - INFO - average_pop_den:         0.0
+2023-01-23 09:57:51,306 - shapely.geos - INFO - Ring Self-intersection at or near point 797537.49654513644 5827111.42437902
+2023-01-23 09:57:51,307 - root - INFO -  
+2023-01-23 09:57:51,307 - root - INFO - --- Minibock is ignored
+2023-01-23 09:57:51,307 - root - INFO - inner_street_l:          489.8054545688111
+2023-01-23 09:57:51,307 - root - INFO - max_l_inner_streets:     1280.0
+2023-01-23 09:57:51,307 - root - INFO - min_l_inner_streets:     160.0
+2023-01-23 09:57:51,307 - root - INFO - outer_cycle_length:      0
+2023-01-23 09:57:51,307 - root - INFO - max_l_outer:             2560.0
+2023-01-23 09:57:51,307 - root - INFO - min_l_outer:             426.667
+2023-01-23 09:57:51,307 - root - INFO - path_crit:               0
+2023-01-23 09:57:51,307 - root - INFO - average_GFA_den:         0.6123384537529345
+2023-01-23 09:57:51,307 - root - INFO - average_pop_den:         0.0
+2023-01-23 09:57:51,370 - shapely.geos - INFO - Ring Self-intersection at or near point 798066.71867088543 5827199.1595828794
+2023-01-23 09:57:51,371 - root - INFO -  
+2023-01-23 09:57:51,371 - root - INFO - --- Minibock is ignored
+2023-01-23 09:57:51,371 - root - INFO - inner_street_l:          517.374085981168
+2023-01-23 09:57:51,371 - root - INFO - max_l_inner_streets:     1280.0
+2023-01-23 09:57:51,371 - root - INFO - min_l_inner_streets:     160.0
+2023-01-23 09:57:51,371 - root - INFO - outer_cycle_length:      0
+2023-01-23 09:57:51,371 - root - INFO - max_l_outer:             2560.0
+2023-01-23 09:57:51,371 - root - INFO - min_l_outer:             426.667
+2023-01-23 09:57:51,371 - root - INFO - path_crit:               0
+2023-01-23 09:57:51,371 - root - INFO - average_GFA_den:         0.4640186209298995
+2023-01-23 09:57:51,371 - root - INFO - average_pop_den:         0.0
+2023-01-23 09:57:51,374 - shapely.geos - INFO - Ring Self-intersection at or near point 798447.77421185561 5827211.5945873205
+2023-01-23 09:57:51,454 - shapely.geos - INFO - Ring Self-intersection at or near point 798447.77421185561 5827211.5945873205
+2023-01-23 09:57:51,462 - shapely.geos - INFO - Ring Self-intersection at or near point 798447.77421185561 5827211.5945873205
+2023-01-23 09:57:51,467 - shapely.geos - INFO - Ring Self-intersection at or near point 798447.77421185561 5827211.5945873205
+2023-01-23 09:57:51,494 - shapely.geos - INFO - Ring Self-intersection at or near point 798447.77421185561 5827211.5945873205
+2023-01-23 09:57:51,498 - shapely.geos - INFO - Ring Self-intersection at or near point 798051.18312587892 5827295.6830539946
+2023-01-23 09:57:51,509 - shapely.geos - INFO - Ring Self-intersection at or near point 798447.77421185561 5827211.5945873205
+2023-01-23 09:57:51,513 - shapely.geos - INFO - Ring Self-intersection at or near point 798447.77421185561 5827211.5945873205
+2023-01-23 09:57:51,517 - shapely.geos - INFO - Ring Self-intersection at or near point 798447.77421185561 5827211.5945873205
+2023-01-23 09:57:51,678 - shapely.geos - INFO - Ring Self-intersection at or near point 797717.15290605044 5827712.9812320601
+2023-01-23 09:57:51,688 - shapely.geos - INFO - Ring Self-intersection at or near point 797717.15290605044 5827712.9812320601
+2023-01-23 09:57:51,697 - shapely.geos - INFO - Ring Self-intersection at or near point 797984.58279099897 5826885.5098716188
+2023-01-23 09:57:51,701 - shapely.geos - INFO - Ring Self-intersection at or near point 797984.58279099897 5826885.5098716188
+2023-01-23 09:57:51,705 - shapely.geos - INFO - Ring Self-intersection at or near point 798447.77421185561 5827211.5945873205
+2023-01-23 09:57:51,708 - shapely.geos - INFO - Ring Self-intersection at or near point 798447.77421185561 5827211.5945873205
+2023-01-23 09:57:51,711 - shapely.geos - INFO - Ring Self-intersection at or near point 798051.18312587892 5827295.6830539946
+2023-01-23 09:57:51,714 - shapely.geos - INFO - Ring Self-intersection at or near point 798160.43659577752 5827670.7914212849
+2023-01-23 09:57:51,715 - root - INFO - Superblock densities not fulfilled 0.38342 1045.48834
+2023-01-23 09:57:51,735 - root - INFO - ... writing out characterized
