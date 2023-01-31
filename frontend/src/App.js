@@ -119,38 +119,18 @@ function App() {
             </FeatureGroup>
 
             <FeatureGroup>
-                {
-                    showResults.streets && Object.keys(currentResponse).includes("streets") ?
-                        <GeoJSON key={`streets-${currentResponse.job_id}`} data={currentResponse.streets}/> : null
-                }
-
-                { /*
-                    showResults.blocks && Object.keys(currentResponse).includes("blocks") ?
-                        <GeoJSON key={`blocks-${currentResponse.job_id}`} data={currentResponse.blocks}/> : null
-                        */
-                }
 
                 {
 
                     renderSuperblocks('blocks')
 
                 }
-
-                {
-                    showResults.blocks_no_street && Object.keys(currentResponse).includes("blocks_no_street") ?
-                        <GeoJSON key={`blocks_no_street-${currentResponse.job_id}`}
-                                 data={currentResponse.blocks_no_street}/> : null
-                }
-
-                {
-                    showResults.buildings && Object.keys(currentResponse).includes("buildings") ?
-                        <GeoJSON key={`buildings-${currentResponse.job_id}`} data={currentResponse.buildings}/> : null
-                }
             </FeatureGroup>
 
         </MapContainer>
 
-        {Object.keys(currentResponse).length > 0 ?
+        {/*
+            Object.keys(currentResponse).length > 0 ?
             <div style={{display: "flex", justifyContent: "center"}}>
                 <Button color={!showResults.blocks ? "primary" : "secondary"}
                         onClick={() => setShowResults({...showResults, ...{blocks: !showResults.blocks}})}>Super/Mini-Blocks</Button>
@@ -163,7 +143,7 @@ function App() {
                         onClick={() => setShowResults({...showResults, ...{buildings: !showResults.buildings}})}>Gebäude</Button>
             </div>
             : null
-        }
+        */}
     </Dashboard>
 }
 

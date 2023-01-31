@@ -22,6 +22,7 @@ import ListItemText from "@mui/material/ListItemText";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListSubheader from "@mui/material/ListSubheader";
 
+import CenteredTabs from './AppBarTabs'
 
 const drawerWidth = 240;
 
@@ -179,8 +180,9 @@ function Dashboard(props) {
                             noWrap
                             sx={{flexGrow: 1}}
                         >
-                            Superblock Generator Demo
+                            <CenteredTabs />
                         </Typography>
+
                     </Toolbar>
                 </AppBar>
                 <Drawer variant="permanent" open={open}>
@@ -218,9 +220,8 @@ function Dashboard(props) {
                     }}
                 >
                     <Toolbar/>
-                    <Container maxWidth="lg" sx={{mt: 4, mb: 4}}>
+                    <Container maxWidth={'xl'} sx={{mt: 8, mb: 4}}>
                         <Grid container spacing={3}>
-                            {/* Chart */}
                             <Grid item xs={12}>
                                 <Paper
                                     sx={{
