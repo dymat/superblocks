@@ -57,7 +57,7 @@ calculate_pop_density = True
 hp_rw.create_folder(path_out)
 
 # Window selection
-length_in_m = 5000  # [m]
+length_in_m = 15000  # [m]
 radius_pop_density = 100  # [m]
 radius_GFA_density = 100 # [m]
 sleep_time = 3
@@ -336,7 +336,10 @@ for city in case_studies:
         if gdf_streets.shape[0] > 0:
             # TODO: get street (=edges) from postgis
             #gdf_streets = gpd.read_file(path_street)
-            G_streets = hp_rw.gdf_to_nx(gdf_streets)
+            if G_simple:
+                G_streets = G_simple
+            else:
+                G_streets = hp_rw.gdf_to_nx(gdf_streets)
 
             # Remove footway (new)
             G_streets = hp_net.remove_edge_by_attribute(G_streets, attribute='tags.highway', value="footway")
@@ -389,7 +392,10 @@ for city in case_studies:
         # TODO: get street edges with attributes from postgis
         gdf_street = edges
         #gdf_street = gpd.read_file(os.path.join(path_out_city, "street_network_edges_with_attributes.shp"))
-        G = hp_rw.gdf_to_nx(gdf_street)
+        if G_streets:
+            G = G_streets
+        else:
+            G = hp_rw.gdf_to_nx(gdf_street)
 
         # Get bounding box
         bb = hp_osm.BB(
