@@ -77,7 +77,7 @@ export default function WorkflowStepper(props) {
                 <Paper square elevation={0} sx={{ p: 3, display: "flex", justifyContent: "left" }}>
                     <Button
                         variant="outlined" color="error"
-                        onClick={() => console.log("reset")}
+                        onClick={props.handleReset}
                         sx={{ mt: 1, mr: 1 }}
                     >
                         Alles auf Anfang

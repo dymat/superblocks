@@ -107,6 +107,15 @@ function App() {
         setStepperState( prevState => prevState - 1)
     }
 
+    const handleReset = () => {
+        setStepperState(0)
+        setCurrentResponse({})
+        setRoi([])
+        setCurrentLayer(null)
+        setSelectedSuperblock(null)
+        fgRef.current.clearLayers()
+    }
+
 
     return <Dashboard
         analyze={handleStartAnalyze}
@@ -117,6 +126,7 @@ function App() {
         stepperState={stepperState}
         handleNextStep={handleNextStep}
         handleBackStep={handleBackStep}
+        handleReset={handleReset}
     >
         <MapContainer center={[52.509, 13.385]}
                       zoom={13}
