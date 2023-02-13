@@ -2,8 +2,6 @@ import React, {useState, useRef} from 'react';
 import Dashboard from './dashboard/Dashboard'
 import {MapContainer, TileLayer, FeatureGroup, GeoJSON} from "react-leaflet";
 import {EditControl} from "react-leaflet-draw"
-import {Button} from "@mui/material";
-
 
 function App() {
     const [roi, setRoi] = useState([])
@@ -17,7 +15,7 @@ function App() {
         buildings: false
     })
     const [highlightedBlockId, setHighlightedBlockId] = useState(-1)
-
+    const [selectedSuperblock, setSelectedSuperblock] = useState(null)
 
     const handleStopDraw = e => {
         /*
@@ -82,15 +80,23 @@ function App() {
                 fillOpacity: highlightedBlockId === blockId ? 0.8 : 0.3
             }
 
-            return <GeoJSON data={item} key={`${key}-${blockId}`} style={style}/>
+            return <GeoJSON data={item} key={`${key}-${blockId}`} style={style} />
         })
 
         return shapes
     }
 
 
-    return <Dashboard analyze={handleStartAnalyze} data={currentResponse} onHoverOverListItem={setHighlightedBlockId}>
-        <MapContainer center={[52.509, 13.385]} zoom={13} scrollWheelZoom={true}
+    return <Dashboard
+        analyze={handleStartAnalyze}
+        data={currentResponse}
+        onHoverOverListItem={setHighlightedBlockId}
+        selectSuperblock={setSelectedSuperblock}
+    >
+        <MapContainer center={[52.509, 13.385]}
+                      zoom={13}
+                      scrollWheelZoom={true}
+                      zoomControl={false}
                       style={{display: "flex", width: "100%", minHeight: 800, height: "100%"}}>
             <TileLayer
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -128,22 +134,6 @@ function App() {
             </FeatureGroup>
 
         </MapContainer>
-
-        {/*
-            Object.keys(currentResponse).length > 0 ?
-            <div style={{display: "flex", justifyContent: "center"}}>
-                <Button color={!showResults.blocks ? "primary" : "secondary"}
-                        onClick={() => setShowResults({...showResults, ...{blocks: !showResults.blocks}})}>Super/Mini-Blocks</Button>
-                <Button color={!showResults.blocks_no_street ? "primary" : "secondary"}
-                        onClick={() => setShowResults({...showResults, ...{blocks_no_street: !showResults.blocks_no_street}})}>Einzelne
-                    Blocks</Button>
-                <Button color={!showResults.streets ? "primary" : "secondary"}
-                        onClick={() => setShowResults({...showResults, ...{streets: !showResults.streets}})}>Straßen</Button>
-                <Button color={!showResults.buildings ? "primary" : "secondary"}
-                        onClick={() => setShowResults({...showResults, ...{buildings: !showResults.buildings}})}>Gebäude</Button>
-            </div>
-            : null
-        */}
     </Dashboard>
 }
 

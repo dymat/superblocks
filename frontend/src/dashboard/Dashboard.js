@@ -15,14 +15,15 @@ import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
 import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import {mainListItems} from "./listItems";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import ListItemText from "@mui/material/ListItemText";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListSubheader from "@mui/material/ListSubheader";
+import Popper from "@mui/material/Popper";
 
 import CenteredTabs from './AppBarTabs'
+import ControlledAccordions from './Accordion'
 
 const drawerWidth = 240;
 
@@ -70,6 +71,21 @@ const Drawer = styled(MuiDrawer, {shouldForwardProp: (prop) => prop !== 'open'})
     }),
 );
 
+const AccordionContainer = styled(Container, {shouldForwardProp: (prop) => prop !== 'open'})(
+    ({theme, open}) => ({
+        position: 'absolute',
+        zIndex: theme.zIndex.appBar - 10,
+        padding: 0,
+        width: 500,
+        top: 64 + 24,
+        left: open ? drawerWidth : 72,
+        transition: theme.transitions.create('left', {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.enteringScreen,
+        }),
+    }),
+);
+
 const mdTheme = createTheme();
 
 function Dashboard(props) {
@@ -94,6 +110,7 @@ function Dashboard(props) {
             return (
                 <ListItemButton
                     key={`miniblock-list-item-${blockId}`}
+                    onClick={() => props.selectSuperblock(blockId)}
                     onMouseOver={() => props.onHoverOverListItem(blockId)}
                     onMouseOut={() => props.onHoverOverListItem(-1)}
                 >
@@ -111,6 +128,7 @@ function Dashboard(props) {
             return (
                 <ListItemButton
                     key={`superblock-list-item-${blockId}`}
+                    onClick={() => props.selectSuperblock(blockId)}
                     onMouseOver={() => props.onHoverOverListItem(blockId)}
                     onMouseOut={() => props.onHoverOverListItem(-1)}
                 >
@@ -180,7 +198,7 @@ function Dashboard(props) {
                             noWrap
                             sx={{flexGrow: 1}}
                         >
-                            <CenteredTabs />
+                            <CenteredTabs/>
                         </Typography>
 
                     </Toolbar>
@@ -220,28 +238,18 @@ function Dashboard(props) {
                     }}
                 >
                     <Toolbar/>
-                    <Container maxWidth={'xl'} sx={{mt: 8, mb: 4}}>
-                        <Grid container spacing={3}>
-                            <Grid item xs={12}>
-                                <Paper
-                                    sx={{
-                                        p: 2,
-                                        display: 'flex',
-                                        flexDirection: 'column',
-                                        height: "100%",
-                                    }}
-                                >
-                                    {props.children}
-                                </Paper>
-                            </Grid>
-                            <Grid item xs={12} style={{display: "flex", justifyContent: "center"}}>
-                                <IconButton onClick={() => props.analyze()}>
-                                    <ModeStandbyRoundedIcon style={{width: 50, height: 50}}/>
-                                </IconButton>
 
-                            </Grid>
-                        </Grid>
-                    </Container>
+                    { /* Map */}
+                    <Box sx={{height: "calc(100% - 64px)"}}>
+                        {props.children}
+                    </Box>
+
+                    { /* Accordions */}
+                    <AccordionContainer open={open}>
+                        <ControlledAccordions />
+                    </AccordionContainer>
+
+
                 </Box>
             </Box>
         </ThemeProvider>
