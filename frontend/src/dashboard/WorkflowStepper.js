@@ -19,7 +19,7 @@ const steps = [
         label: 'Möchten Sie noch ein eigene Blocks hinzufügen?',
         description:
             'Um die Liste der gefundenen Superblocks durch eigene Blocks zu ergänzen, nutzen Sie bitte das' +
-            'Polygon-Zeichenwerkzeug rechts oben.',
+            'Polygon-Zeichenwerkzeug rechts oben. #TODO',
     },
     {
         label: 'Welche Kriterien für die qualtitative Bewertung der potentiellen Superblocks sind Ihnen wichtig?',
