@@ -16,6 +16,8 @@ function App() {
     })
     const [highlightedBlockId, setHighlightedBlockId] = useState(-1)
     const [selectedSuperblock, setSelectedSuperblock] = useState(null)
+    const [appStatus, setAppStatus] = useState("ready")
+    const [stepperState, setStepperState] = useState(0)
 
     const handleStopDraw = e => {
         /*
@@ -42,6 +44,9 @@ function App() {
     const colors = ["#D32F2F", "#7B1FA2", "#1976D2", "#0097A7", "#388E3C", "#AFB42B", "#FFA000", "#E64A19"]
 
     const handleStartAnalyze = () => {
+
+        setAppStatus('loading')
+
         const data = {
             name: "Berlin",
             coords: roi
@@ -59,6 +64,9 @@ function App() {
         })
             .then(response => response.json())
             .then(json => setCurrentResponse(json))
+            .then(() => setAppStatus('ready'))
+            .then(() => setStepperState(prevState => prevState + 1))
+            .catch(() => setAppStatus("error"))
     }
 
 
@@ -86,12 +94,29 @@ function App() {
         return shapes
     }
 
+    const handleNextStep = () => {
+
+        if (stepperState === 0) {
+            handleStartAnalyze()
+        } else {
+            setStepperState(prevState => prevState + 1)
+        }
+    }
+
+    const handleBackStep = () => {
+        setStepperState( prevState => prevState - 1)
+    }
+
 
     return <Dashboard
         analyze={handleStartAnalyze}
         data={currentResponse}
         onHoverOverListItem={setHighlightedBlockId}
         selectSuperblock={setSelectedSuperblock}
+        appStatus={appStatus}
+        stepperState={stepperState}
+        handleNextStep={handleNextStep}
+        handleBackStep={handleBackStep}
     >
         <MapContainer center={[52.509, 13.385]}
                       zoom={13}

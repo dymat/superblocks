@@ -76,7 +76,7 @@ const AccordionContainer = styled(Container, {shouldForwardProp: (prop) => prop 
         position: 'absolute',
         zIndex: theme.zIndex.appBar - 10,
         padding: 0,
-        width: 500,
+        width: 600,
         top: 64 + 24,
         left: open ? drawerWidth : 72,
         transition: theme.transitions.create('left', {
@@ -246,7 +246,7 @@ function Dashboard(props) {
 
                     { /* Accordions */}
                     <AccordionContainer open={open}>
-                        <ControlledAccordions />
+                        <ControlledAccordions {...props} />
                     </AccordionContainer>
 
 
