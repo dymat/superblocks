@@ -7,7 +7,7 @@ import StepContent from '@mui/material/StepContent';
 import Button from '@mui/material/Button';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
-import CircularProgress from '@mui/material/CircularProgress';
+import LoadingButton from '@mui/lab/LoadingButton';
 
 const steps = [
     {
@@ -26,6 +26,7 @@ const steps = [
         description: `Lorem ipsum dolor sit amet. #TODO`,
     },
 ];
+
 
 export default function WorkflowStepper(props) {
     return (
@@ -59,14 +60,16 @@ export default function WorkflowStepper(props) {
                                         Zurück
                                     </Button>
 
-                                    <Button
-                                        disabled={props.appStatus === 'loading'}
+                                    <LoadingButton
+                                        loading={props.appStatus == "loading"}
+                                        loadingPosition="end"
                                         variant="contained"
-                                        onClick={props.handleNextStep}
+                                        onClick= {props.handleNextStep}
                                         sx={{ mt: 1, mr: 1 }}
                                     >
-                                        {index === steps.length - 1 ? 'Fertig' : 'Weiter'}
-                                    </Button>
+                                        {index === steps.length - 1 ? 'Fertig' : 
+                                            props.appStatus === "loading" ? "Berechne Superblocks...    " : 'Weiter'}
+                                    </LoadingButton>
                                 </div>
                             </Box>
                         </StepContent>
