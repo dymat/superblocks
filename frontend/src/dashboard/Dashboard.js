@@ -21,6 +21,7 @@ import ListItemText from "@mui/material/ListItemText";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListSubheader from "@mui/material/ListSubheader";
 import Popper from "@mui/material/Popper";
+import {Select, FormControl, InputLabel, MenuItem} from "@mui/material";
 
 import CenteredTabs from './AppBarTabs'
 import ControlledAccordions from './Accordion'
@@ -86,10 +87,32 @@ const AccordionContainer = styled(Container, {shouldForwardProp: (prop) => prop 
     }),
 );
 
+const CityListContainer = styled(Container, {shouldForwardProp: (prop) => prop !== 'open'})(
+    ({theme, open}) => ({
+        position:"absolute",
+        zIndex: theme.zIndex.appBar - 10,
+        bottom:"0px",
+        width: 600,
+        height: 100,
+        left: open ? drawerWidth : 72,
+        transition: theme.transitions.create('left', {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.enteringScreen,
+        }),
+    }),
+);
+
 const mdTheme = createTheme();
 
 function Dashboard(props) {
     const [open, setOpen] = React.useState(false);
+    const [city, setCity] = React.useState("");
+
+    const handleCityChange = (event) => {
+        setCity(event.target.value);
+        props.handleChangedCenter(event.target.value)
+    };
+
     const toggleDrawer = () => {
         setOpen(!open);
     };
@@ -248,6 +271,27 @@ function Dashboard(props) {
                     <AccordionContainer open={open}>
                         <ControlledAccordions {...props} />
                     </AccordionContainer>
+
+                    <CityListContainer open={open}>
+                        <FormControl
+                        position={'bottomleft'}>
+                            <InputLabel id="select-city-label">Stadt</InputLabel>
+                            <Select
+                                sx={{ backgroundColor:'white',
+                                        minWidth: 100}}
+                                labelId="elect-city-label"
+                                id="select-city"
+                                value={city}
+                                label="Stadt"
+                                onChange={handleCityChange}
+                            >
+                                <MenuItem value={"Berlin"}>Berlin</MenuItem>
+                                <MenuItem value={"other"}>other</MenuItem>
+                                <MenuItem value={"next"}>next</MenuItem>
+                            </Select>
+                        </FormControl>
+
+                    </CityListContainer>
 
 
                 </Box>

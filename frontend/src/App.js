@@ -1,7 +1,7 @@
 import React, {useState, useRef} from 'react';
-import Dashboard from './dashboard/Dashboard'
+import Dashboard from './dashboard/Dashboard';
 import {MapContainer, TileLayer, FeatureGroup, GeoJSON} from "react-leaflet";
-import {EditControl} from "react-leaflet-draw"
+import {EditControl} from "react-leaflet-draw";
 
 function App() {
     const [roi, setRoi] = useState([])
@@ -18,6 +18,8 @@ function App() {
     const [selectedSuperblock, setSelectedSuperblock] = useState(null)
     const [appStatus, setAppStatus] = useState("ready")
     const [stepperState, setStepperState] = useState(0)
+    const [map, setMap] = React.useState(null);
+    const [zoom, setZoom] = React.useState(13);
 
     const handleStopDraw = e => {
         /*
@@ -67,6 +69,11 @@ function App() {
             .then(() => setAppStatus('ready'))
             .then(() => setStepperState(prevState => prevState + 1))
             .catch(() => setAppStatus("error"))
+    }
+
+    const handleChangedCenter = (cityname) => {
+        console.log(cityname)
+        map.flyTo([49.44, 7.77], zoom)
     }
 
 
@@ -127,12 +134,14 @@ function App() {
         handleNextStep={handleNextStep}
         handleBackStep={handleBackStep}
         handleReset={handleReset}
+        handleChangedCenter={handleChangedCenter}
     >
         <MapContainer center={[52.509, 13.385]}
-                      zoom={13}
+                      zoom={zoom}
                       scrollWheelZoom={true}
                       zoomControl={false}
-                      style={{display: "flex", width: "100%", minHeight: 800, height: "100%"}}>
+                      style={{display: "flex", width: "100%", minHeight: 800, height: "100%"}}
+                      ref={setMap}>
             <TileLayer
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
@@ -167,7 +176,6 @@ function App() {
 
                 }
             </FeatureGroup>
-
         </MapContainer>
     </Dashboard>
 }
