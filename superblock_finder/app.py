@@ -1,11 +1,10 @@
 import json
+from os import environ
 
 from fastapi import FastAPI
 from fastapi.exceptions import HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-
 from psycopg2 import connect
-from os import environ
 
 from _types import Region, Coord
 from superblock import find_superblocks
@@ -18,6 +17,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 @app.get("/")
 def read_root():
@@ -39,7 +39,8 @@ def add_job(roi: Region):
             con.commit()
 
             if len(roi.coords) < 3:
-                return HTTPException(status_code=500, detail="No valid polygon given. You need to provide at least 3 points.")
+                return HTTPException(status_code=500,
+                                     detail="No valid polygon given. You need to provide at least 3 points.")
 
             coords = roi.coords + [roi.coords[0]]
             polygon = "POLYGON((" + ",".join([f"{point.lng} {point.lat}" for point in coords]) + "))"
@@ -59,7 +60,8 @@ def add_job(roi: Region):
             except Exception:
                 return HTTPException(status_code=500, detail="Job not added successfully to database.")
 
-            gdf_street_areas_all, intersect_buildings, all_blocks, blocks_no_street_all = find_superblocks(job_id=job_id, region_of_interest=roi)
+            gdf_street_areas_all, intersect_buildings, all_blocks, blocks_no_street_all = find_superblocks(
+                job_id=job_id, region_of_interest=roi)
 
             try:
                 intersect_buildings.drop(columns=["created_at"], inplace=True)
@@ -83,3 +85,24 @@ def add_job(roi: Region):
                 blocks=json.loads(blocks_geojson),
                 blocks_no_street=json.loads(blocks_no_street_geojson)
             )
+
+
+@app.get("/schools")
+def get_schools():
+    """
+
+    :return:
+    """
+
+    roi = Region(
+        coords=[
+            Coord(lat=52.3, lng=13.5),
+            Coord(lat=53.1, lng=13.8),
+            Coord(lat=52.6, lng=13.6)
+        ]
+    )
+    from superblock_rating.data import OverpassData
+    osm = OverpassData(roi)
+    print(roi, osm.bbox)
+
+    return osm.grundschulen

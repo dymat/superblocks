@@ -22,10 +22,11 @@ services:
       - postgis
     volumes:
       - ./data:/data
-      - ./superblock_finder/superblock.py:/superblock.py:ro
-      - ./superblock_finder/preprocess_osm.py:/preprocess_osm.py:ro
-      - ./superblock_finder/app.py:/app.py:ro
-      - ./superblock_finder/_types:/_types:ro
+      - ./superblock_finder/superblock.py:/api/superblock.py:ro
+      - ./superblock_finder/preprocess_osm.py:/api/preprocess_osm.py:ro
+      - ./superblock_finder/app.py:/api/app.py:ro
+      - ./superblock_finder/_types:/api/_types:ro
+      - ./superblock_finder/superblock_rating:/api/superblock_rating:ro
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
