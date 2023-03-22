@@ -47,7 +47,6 @@ class OverpassData(Data):
                 node["amenity"="kindergarten"]{bbox};
             ) -> .kindergarten;
             
-            
             // Hausärzte
             (
                 way["amenity"="doctors"](52.3, 13.5, 53.1, 13.8);

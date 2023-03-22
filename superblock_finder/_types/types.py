@@ -21,4 +21,3 @@ class Region(BaseModel):
     coords: List[Coord]
     name: str | None
 
-
