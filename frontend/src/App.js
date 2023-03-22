@@ -20,6 +20,7 @@ function App() {
     const [stepperState, setStepperState] = useState(0)
     const [map, setMap] = React.useState(null);
     const [zoom, setZoom] = React.useState(13);
+    const [city, setCity] = React.useState("Berlin")
 
     const handleStopDraw = e => {
         /*
@@ -50,7 +51,7 @@ function App() {
         setAppStatus('loading')
 
         const data = {
-            name: "Berlin",
+            name: city,
             coords: roi
         }
 
@@ -72,8 +73,29 @@ function App() {
     }
 
     const handleChangedCenter = (cityname) => {
-        console.log(cityname)
-        map.flyTo([49.44, 7.77], zoom)
+        setAppStatus('loading')
+
+        const data = {
+            name: cityname
+        }
+
+        fetch("http://localhost:9123/city", {
+            method: "POST",
+            mode: "cors",
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            redirect: 'follow',
+            referrerPolicy: 'no-referrer',
+            body: JSON.stringify(data)
+        })
+            .then(response => response.json())
+            .then(json => {
+                console.log(json);
+                map.flyTo([json.lat, json.long]);
+                setCity(cityname);})
+            .then(() => setAppStatus('ready'))
+            .catch(() => setAppStatus("error")) 
     }
 
 

@@ -9,10 +9,7 @@ import List from '@mui/material/List';
 import Typography from '@mui/material/Typography';
 import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
-import ModeStandbyRoundedIcon from '@mui/icons-material/ModeStandbyRounded';
 import Container from '@mui/material/Container';
-import Grid from '@mui/material/Grid';
-import Paper from '@mui/material/Paper';
 import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ListItemIcon from "@mui/material/ListItemIcon";
@@ -20,7 +17,6 @@ import DashboardIcon from "@mui/icons-material/Dashboard";
 import ListItemText from "@mui/material/ListItemText";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListSubheader from "@mui/material/ListSubheader";
-import Popper from "@mui/material/Popper";
 import {Select, FormControl, InputLabel, MenuItem} from "@mui/material";
 
 import CenteredTabs from './AppBarTabs'
@@ -285,9 +281,8 @@ function Dashboard(props) {
                                 label="Stadt"
                                 onChange={handleCityChange}
                             >
-                                <MenuItem value={"Berlin"}>Berlin</MenuItem>
-                                <MenuItem value={"other"}>other</MenuItem>
-                                <MenuItem value={"next"}>next</MenuItem>
+                                <MenuItem value={"berlin"}>Berlin</MenuItem>
+                                <MenuItem value={"frankfurt"}>Frankfurt</MenuItem>
                             </Select>
                         </FormControl>
 

@@ -13,10 +13,11 @@ path_superblocks = os.path.abspath(os.path.join(os.path.dirname(__file__), ''))
 sys.path.append(path_superblocks)
 import time
 import geopandas as gpd
+import pandas as pd
 import networkx as nx
 from shapely.geometry import Point
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, MetaData
 
 from superblocks.scripts.network import helper_osm as hp_osm
 from superblocks.scripts.network import helper_network as hp_net
@@ -57,7 +58,7 @@ calculate_pop_density = True
 hp_rw.create_folder(path_out)
 
 # Window selection
-length_in_m = 15000  # [m]
+length_in_m = 150  # [m]
 radius_pop_density = 100  # [m]
 radius_GFA_density = 100 # [m]
 sleep_time = 3
@@ -85,7 +86,7 @@ case_studies = [
     #'tokyo',         
     #'warsaw',        
     #'zurich',
-    #'frankfurt',
+    'frankfurt',
     #'freiburg',
     #'hamburg',
     #'munchen'
@@ -95,6 +96,27 @@ case_studies = [
 postgis_connection = create_engine(f"postgresql://{os.getenv('POSTGRES_USER', 'postgres')}:" \
                      f"{os.getenv('POSTGRES_PASSWORD', 'postgres')}" \
                      f"@{os.getenv('POSTGRES_HOST', 'localhost')}:5432/{os.getenv('POSTGRES_DATABASE', 'postgres')}")
+
+used_tables = ["bbox",
+                "city",
+                "buildings",
+                "water",
+                "bus",
+                "bridges",
+                "landuse",
+                "tram",
+                "trolleybus",
+                "street_network_nodes",
+                "street_network_edges",
+                "fb_pop",
+                "street_network_nodes_with_attributes_pop_density",
+                "street_network_edges_with_attributes_pop_density"]
+
+meta = MetaData(bind=postgis_connection)
+meta.reflect()
+for table in meta.sorted_tables:
+    if str(table) in used_tables:
+        table.drop(checkfirst=True)
 
 
 for city in case_studies:
@@ -124,7 +146,9 @@ for city in case_studies:
         bb_gdf = bb.as_gdf(crs_orig=to_crs_meter)
 
         # bb to postgis
-        bb_gdf.to_postgis("bbox", postgis_connection, if_exists="replace")
+        bb_gdf.to_postgis("bbox", postgis_connection, if_exists="append")
+        centroid["name"] = city
+        centroid.to_postgis("city", postgis_connection, if_exists="append")
 
         #bb_gdf.to_file(os.path.join(path_out_city, "extent.shp"))
         bb_osm = bb_gdf.to_crs("epsg:{}".format(crs_bb))
@@ -167,7 +191,7 @@ for city in case_studies:
 
             # TODO: buildings to postgis
             # bb to postgis
-            osm_buildings_gdf.to_postgis("buildings", postgis_connection, if_exists="replace")
+            osm_buildings_gdf.to_postgis("buildings", postgis_connection, if_exists="append")
             #osm_gdf.to_file(path_buildings)
 
         # Download water
@@ -179,7 +203,7 @@ for city in case_studies:
                 osm_water_gdf = hp_net.gdf_multilinestring_to_linestring(osm_water_gdf)
 
                 # TODO: water to postgis
-                osm_water_gdf.to_postgis("water", postgis_connection, if_exists="replace")
+                osm_water_gdf.to_postgis("water", postgis_connection, if_exists="append")
                 #osm_water_gdf.to_file(path_water)
 
         # Download bus
@@ -192,7 +216,7 @@ for city in case_studies:
                 osm_bus_gdf = hp_net.gdf_multilinestring_to_linestring(osm_bus_gdf)
 
                 # TODO: bus to postgis
-                osm_bus_gdf.to_postgis("bus", postgis_connection, if_exists="replace")
+                osm_bus_gdf.to_postgis("bus", postgis_connection, if_exists="append")
                 #osm_bus_gdf.to_file(path_bus)
 
         # Download bridges
@@ -204,7 +228,7 @@ for city in case_studies:
             if osm_bridges_gdf.shape[0] > 0:
 
                 # TODO: bridges to postgis
-                osm_bridges_gdf.to_postgis("bridges", postgis_connection, if_exists="replace")
+                osm_bridges_gdf.to_postgis("bridges", postgis_connection, if_exists="append")
                 #osm_bridges_gdf.to_file(path_bridges)
 
         # Download land use
@@ -216,7 +240,7 @@ for city in case_studies:
             if osm_landuse_gdf.shape[0] > 0:
 
                 # TODO: landuse to postgis
-                osm_landuse_gdf.to_postgis("landuse", postgis_connection, if_exists="replace")
+                osm_landuse_gdf.to_postgis("landuse", postgis_connection, if_exists="append")
                 #osm_landuse_gdf.to_file(path_landuse)
 
         # Download tram
@@ -229,7 +253,7 @@ for city in case_studies:
             if osm_tram_gdf.shape[0] > 0:
 
                 # TODO: tram to postgis
-                osm_tram_gdf.to_postgis("tram", postgis_connection, if_exists="replace")
+                osm_tram_gdf.to_postgis("tram", postgis_connection, if_exists="append")
                 #osm_tram_gdf.to_file(path_tram)
 
         # Download bus
@@ -242,7 +266,7 @@ for city in case_studies:
             if osm_trolleybus_gdf.shape[0] > 0:
 
                 # TODO: trolleybus to postgis
-                osm_trolleybus_gdf.to_postgis("trolleybus", postgis_connection, if_exists="replace")
+                osm_trolleybus_gdf.to_postgis("trolleybus", postgis_connection, if_exists="append")
                 #osm_trolleybus_gdf.to_file(path_trolleybus)
 
         # Download streets
@@ -268,8 +292,8 @@ for city in case_studies:
 
             print("Streets", edges.shape)
 
-            nodes.to_postgis("street_network_nodes", postgis_connection, if_exists="replace")
-            edges.to_postgis("street_network_edges", postgis_connection, if_exists="replace")
+            nodes.to_postgis("street_network_nodes", postgis_connection, if_exists="append")
+            edges.to_postgis("street_network_edges", postgis_connection, if_exists="append")
 
         print("downloaded simple street: {}".format(city))
 
@@ -376,7 +400,7 @@ for city in case_studies:
             nodes, edges = hp_rw.nx_to_gdf(G_streets)
 
             # TODO: street edges with attributes to postgis
-            edges.to_postgis("street_network_edges_with_attributes", postgis_connection, if_exists="replace")
+            edges.to_postgis("street_network_edges_with_attributes", postgis_connection, if_exists="append")
             #edges.to_file(os.path.join(path_out_city, 'street_network_edges_with_attributes.shp'))
 
         print("assign_attributes_to_graph finished")
@@ -412,7 +436,7 @@ for city in case_studies:
         else:
             raise Exception("Wrong format type")
         #pop_pnts.to_file(os.path.join(path_out_city, "fb_pop.shp"))
-        pop_pnts.to_postgis("fb_pop", postgis_connection, if_exists="replace")
+        pop_pnts.to_postgis("fb_pop", postgis_connection, if_exists="append")
 
         # ----Calculate population density
         G = hp_net.calc_edge_and_node_pop_density(
@@ -431,7 +455,7 @@ for city in case_studies:
         #nodes.to_file(os.path.join(path_out_city, 'street_network_nodes_with_attributes_pop_density.shp'))
         #edges.to_file(os.path.join(path_out_city, 'street_network_edges_with_attributes_pop_density.shp'))
 
-        nodes.to_postgis("street_network_nodes_with_attributes_pop_density", postgis_connection, if_exists="replace")
-        edges.to_postgis("street_network_edges_with_attributes_pop_density", postgis_connection, if_exists="replace")
+        nodes.to_postgis("street_network_nodes_with_attributes_pop_density", postgis_connection, if_exists="append")
+        edges.to_postgis("street_network_edges_with_attributes_pop_density", postgis_connection, if_exists="append")
 
 print("-----finished script-----")

@@ -7,7 +7,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from psycopg2 import connect
 from os import environ
 
-from _types import Region, Coord
+from _types import Region
+from pydantic import BaseModel
 from superblock import find_superblocks
 
 app = FastAPI()
@@ -18,6 +19,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+class city(BaseModel):
+    name: str
 
 @app.get("/")
 def read_root():
@@ -83,3 +87,26 @@ def add_job(roi: Region):
                 blocks=json.loads(blocks_geojson),
                 blocks_no_street=json.loads(blocks_no_street_geojson)
             )
+
+@app.post("/city")
+def get_city(city: city):
+    with connect(dbname=environ["POSTGRES_DATABASE"], host=environ["POSTGRES_HOST"], user=environ["POSTGRES_USER"],
+                 password=environ["POSTGRES_PASSWORD"]) as con:
+        with con.cursor() as cur:
+            print(city)
+            sql = "SELECT ST_Y(ST_TRANSFORM(geometry,4674)), ST_X(ST_TRANSFORM(geometry,4674)), name " \
+                  "FROM city " \
+                  f"WHERE name='{city.name}';"
+            cur.execute(sql)
+            con.commit()
+            result = cur.fetchall()
+            if len(result) == 0:
+                res_dict = dict(name="error")
+            else:
+                new_city = result[0]
+                res_dict = dict(
+                    lat=new_city[0],
+                    long=new_city[1]
+                )
+
+            return res_dict
