@@ -109,6 +109,10 @@ function Dashboard(props) {
         props.handleChangedCenter(event.target.value)
     };
 
+    const cityListElements = props.cityList.map((cityname, index) =>
+        <MenuItem key={index} value={cityname}>{cityname}</MenuItem>
+    )
+
     const toggleDrawer = () => {
         setOpen(!open);
     };
@@ -281,8 +285,7 @@ function Dashboard(props) {
                                 label="Stadt"
                                 onChange={handleCityChange}
                             >
-                                <MenuItem value={"berlin"}>Berlin</MenuItem>
-                                <MenuItem value={"frankfurt"}>Frankfurt</MenuItem>
+                                {cityListElements}
                             </Select>
                         </FormControl>
 

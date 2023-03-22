@@ -110,3 +110,23 @@ def get_city(city: city):
                 )
 
             return res_dict
+
+@app.get("/city_list")
+def get_city_list():
+    with connect(dbname=environ["POSTGRES_DATABASE"], host=environ["POSTGRES_HOST"], user=environ["POSTGRES_USER"],
+                 password=environ["POSTGRES_PASSWORD"]) as con:
+        with con.cursor() as cur:
+            print(city)
+            sql = "SELECT name " \
+                  "FROM city;"
+            cur.execute(sql)
+            con.commit()
+            result = cur.fetchall()
+            if len(result) == 0:
+                res_dict = dict(name="error")
+            else:
+                res_dict = dict(
+                    list= result
+                )
+
+            return res_dict

@@ -1,4 +1,4 @@
-import React, {useState, useRef} from 'react';
+import React, {useState, useRef, useEffect} from 'react';
 import Dashboard from './dashboard/Dashboard';
 import {MapContainer, TileLayer, FeatureGroup, GeoJSON} from "react-leaflet";
 import {EditControl} from "react-leaflet-draw";
@@ -20,7 +20,22 @@ function App() {
     const [stepperState, setStepperState] = useState(0)
     const [map, setMap] = React.useState(null);
     const [zoom, setZoom] = React.useState(13);
-    const [city, setCity] = React.useState("Berlin")
+    const [city, setCity] = React.useState("berlin")
+    const [cityList, setCityList] = React.useState(["berlin"])
+
+    
+    useEffect(() => {
+        setAppStatus('loading')
+
+        fetch("http://localhost:9123/city_list")
+            .then(response => response.json())
+            .then(json => {
+                console.log(json.list);
+                setCityList(json.list)})
+            .then(() => setAppStatus('ready'))
+            .catch(() => setAppStatus("error")) 
+
+    }, [])
 
     const handleStopDraw = e => {
         /*
@@ -76,7 +91,7 @@ function App() {
         setAppStatus('loading')
 
         const data = {
-            name: cityname
+            name: cityname[0]
         }
 
         fetch("http://localhost:9123/city", {
@@ -157,6 +172,7 @@ function App() {
         handleBackStep={handleBackStep}
         handleReset={handleReset}
         handleChangedCenter={handleChangedCenter}
+        cityList={cityList}
     >
         <MapContainer center={[52.509, 13.385]}
                       zoom={zoom}
