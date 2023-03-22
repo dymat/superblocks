@@ -8,6 +8,8 @@ from psycopg2 import connect
 
 from _types import Region, Coord
 from superblock import find_superblocks
+from superblock_rating.data import OverpassData
+
 
 app = FastAPI()
 app.add_middleware(
@@ -87,22 +89,16 @@ def add_job(roi: Region):
             )
 
 
-@app.get("/schools")
-def get_schools():
+@app.post("/osm_data")
+def osm_data(roi: Region):
     """
 
     :return:
     """
 
-    roi = Region(
-        coords=[
-            Coord(lat=52.3, lng=13.5),
-            Coord(lat=53.1, lng=13.8),
-            Coord(lat=52.6, lng=13.6)
-        ]
-    )
-    from superblock_rating.data import OverpassData
     osm = OverpassData(roi)
     print(roi, osm.bbox)
 
-    return osm.grundschulen
+    osm.get_data()
+    return osm.to_geopandas().to_json()
+
