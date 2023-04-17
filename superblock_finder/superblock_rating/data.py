@@ -32,6 +32,9 @@ class OverpassData(Data):
         bbox = self.bbox
         query = f"""
             [out:json];
+            ///////////////////////////
+            // BILDUNG
+            ///////////////////////////
             // Grundschulen
             (
                 way["amenity"="school"][name~"Grundschule"]{bbox}; 
@@ -39,6 +42,8 @@ class OverpassData(Data):
                 node["amenity"="school"][name~"Grundschule"]{bbox};
             ) -> .schools;
             
+            (node.schools[amenity]; way.schools[amenity];) -> .result;
+                        
             
             // Kindergärten
             (
@@ -47,11 +52,17 @@ class OverpassData(Data):
                 node["amenity"="kindergarten"]{bbox};
             ) -> .kindergarten;
             
-            // Hausärzte
+            (.result; node.kindergarten[amenity]; way.kindergarten[amenity];) -> .result;
+            
+            ///////////////////////////
+            // MEDIZINISCHE VERSORGUNG
+            /////////////////////////// 
+                       
+            // Ärzte
             (
-                way["amenity"="doctors"](52.3, 13.5, 53.1, 13.8);
+                way["amenity"="doctors"]{bbox};
                 >;
-                node["amenity"="doctors"](52.3, 13.5, 53.1, 13.8);
+                node["amenity"="doctors"]{bbox};
             ) -> .amenity_doctors;
             
             ( .amenity_doctors; - 
@@ -62,23 +73,69 @@ class OverpassData(Data):
             ) -> .doctors;
             
             (
-                way["healthcare"="doctor"](52.3, 13.5, 53.1, 13.8);
+                way["healthcare"="doctor"]{bbox};
                 >;
-                node["healthcare"="doctor"](52.3, 13.5, 53.1, 13.8);
+                node["healthcare"="doctor"]{bbox};
                 .doctors;
             ) -> .doctors;
             
+            (.result; node.doctors[amenity]; way.doctors[amenity];) -> .result;
+            
+            // Apotheken
+            (
+                way["amenity"="pharmacy"]{bbox};
+                >;
+                way["healthcare"="pharmacy"]{bbox};
+                >;
+                node["amenity"="pharmacy"]{bbox};
+                node["healthcare"="pharmacy"]{bbox};
+            ) -> .pharmacy;
+            
+            (.result; node.pharmacy[amenity]; way.pharmacy[amenity];) -> .result;
+
+            ///////////////////////////
+            // ESSEN / TRINKEN
+            ///////////////////////////
             
             (
-              way.doctors[!"healthcare:speciality"]; 
-              node.doctors[!"healthcare:speciality"];
-              way.doctors["healthcare:speciality"="general"];
-              node.doctors["healthcare:speciality"="general"];
-            ) -> .doctors;
+                way["amenity"="bar"]{bbox};
+                >;
+                node["amenity"="bar"]{bbox};
+                
+                way["amenity"="cafe"]{bbox};
+                >;
+                node["amenity"="cafe"]{bbox};
+                
+                way["amenity"="pub"]{bbox};
+                >;
+                node["amenity"="pub"]{bbox};
+                
+                way["amenity"="biergarten"]{bbox};
+                >;
+                node["amenity"="biergarten"]{bbox};
+                
+                way["amenity"="ice_cream"]{bbox};
+                >;
+                node["amenity"="ice_cream"]{bbox};
+                
+                way["amenity"="restaurant"]{bbox};
+                >;
+                node["amenity"="restaurant"]{bbox};
+                
+            ) -> .cafe_bar_restaurant;
             
-            (.schools; .kindergarten; .doctors;) -> .result;
-            (node.result[amenity]; way.result[amenity];) -> ._;
+            (.result; node.cafe_bar_restaurant[amenity]; way.cafe_bar_restaurant[amenity];) -> .result;
             
+            (                
+                way["shop"="bakery"]{bbox};
+                >;
+                node["shop"="bakery"]{bbox};
+            ) -> .bakery;
+            
+            (.result; node.bakery[shop]; way.bakery[shop];) -> .result;
+
+            
+            .result -> ._;
             out center;
         """
 
@@ -89,6 +146,7 @@ class OverpassData(Data):
         print(query)
         if r.ok:
             self.data = r.json()
+            print(len(self.to_geopandas()))
 
     def to_geopandas(self):
 
@@ -109,4 +167,3 @@ class OverpassData(Data):
         gdf.set_crs(epsg=4326, inplace=True)
 
         return gdf
-

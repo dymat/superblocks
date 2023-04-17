@@ -36,7 +36,7 @@ crs_overpass = 4326
 
 path_temp = "/data/tmp"
 path_out = "/data/cities"
-path_pop_data = "/deu_pd_2020_1km.tif"  # Download data as outlined from data source in publication
+path_pop_data = "deu_pd_2020_1km.tif"  # Download data as outlined from data source in publication
 write_anyway = False
 
 try:
