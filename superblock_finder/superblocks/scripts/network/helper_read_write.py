@@ -20,6 +20,8 @@ def city_labels():
         'cairo': 'Cairo',
         'hong_kong': 'Hong Kong',
         'lagos': 'Lagos',
+        'leipzig': 'Leipzig',
+        'mönchengladbach': 'Mönchengladbach',
         'london': 'London',
         'madrid': 'Madrid',
         'melbourne': 'Melbourne',
@@ -96,27 +98,32 @@ def city_metadata(city, path_pop_data="C:/DATA/pop_fb"):
             'crs': None},
         'berlin': {
             'data_type': 'GeoTif',
-            'centroid_tuple': (13.4122611, 52.5225496),  
+            'centroid_tuple': (13.4122611, 52.5225496),
             'path_raw_pop': os.path.join(path_pop_data),
             'crs': 32632},
         'frankfurt': {
             'data_type': 'GeoTif',
-            'centroid_tuple': (8.67000401, 50.10835373),  
+            'centroid_tuple': (8.67000401, 50.10835373),
             'path_raw_pop': os.path.join(path_pop_data),
             'crs': 32632},
         'freiburg': {
             'data_type': 'GeoTif',
-            'centroid_tuple': (7.84604697, 47.99544959),  
+            'centroid_tuple': (7.84604697, 47.99544959),
+            'path_raw_pop': os.path.join(path_pop_data),
+            'crs': 32632},
+        'mönchengladbach': {
+            'data_type': 'GeoTif',
+            'centroid_tuple': (6.4414, 51.2002),
             'path_raw_pop': os.path.join(path_pop_data),
             'crs': 32632},
         'hamburg': {
             'data_type': 'GeoTif',
-            'centroid_tuple': (10.0069566, 53.5530345),  
+            'centroid_tuple': (10.0069566, 53.5530345),
             'path_raw_pop': os.path.join(path_pop_data),
             'crs': 32632},
         'munchen': {
             'data_type': 'GeoTif',
-            'centroid_tuple': (11.576216, 48.135332),  
+            'centroid_tuple': (11.576216, 48.135332),
             'path_raw_pop': os.path.join(path_pop_data),
             'crs': 32632},
         'budapest': {
@@ -143,12 +150,17 @@ def city_metadata(city, path_pop_data="C:/DATA/pop_fb"):
             'data_type': 'GeoTif',
             'centroid_tuple': (3.352456, 6.518423),
             'path_raw_pop': os.path.join(path_pop_data, "population_nga_2018-10-01.tif"),
-            'crs': 23031},  
+            'crs': 23031},
         'london': {
             'data_type': 'GeoTif',
             'centroid_tuple': (-0.089675, 51.512577),
             'path_raw_pop': os.path.join(path_pop_data, "population_gbr_2019-07-01.tif"),
-            'crs': 32630},  
+            'crs': 32630},
+        'leipzig': {
+            'data_type': 'GeoTif',
+            'centroid_tuple': (12.3731, 51.3397),
+            'path_raw_pop': os.path.join(path_pop_data),
+            'crs': 32632},
         'madrid': {
             'data_type': 'GeoTif',
             'centroid_tuple': (-3.7036030, 40.4168092),
@@ -158,22 +170,22 @@ def city_metadata(city, path_pop_data="C:/DATA/pop_fb"):
             'data_type': 'GeoTif',
             'centroid_tuple': (144.966343, -37.811835),
             'path_raw_pop': os.path.join(path_pop_data, "population_aus_southeast_2018-10-01.tif"),
-            'crs': 32755},  
+            'crs': 32755},
         'mexico_city': {
             'data_type': 'GeoTif',
             'centroid_tuple': (-99.1330489, 19.4324909),
             'path_raw_pop': os.path.join(path_pop_data, "population_mex_2018-10-01.tif"),
-            'crs': 32614},  
+            'crs': 32614},
         'moscow': {  #no data
             'data_type': 'csv',
             'centroid_tuple': None,
             'path_raw_pop': None,
-            'crs':  None},  
+            'crs':  None},
         'mumbai': {  #no data
             'data_type': 'csv',
             'centroid_tuple': None,
             'path_raw_pop': None,
-            'crs': None},  
+            'crs': None},
         'rio_de_janeiro': { #no data
             'data_type': 'csv',
             'centroid_tuple': None,
@@ -188,7 +200,7 @@ def city_metadata(city, path_pop_data="C:/DATA/pop_fb"):
             'data_type': 'csv',
             'centroid_tuple': None,
             'path_raw_pop': None,
-            'crs': None},        
+            'crs': None},
         'sydney': {
             'data_type': 'GeoTif',
             'centroid_tuple': (151.204664, -33.883037),
@@ -198,7 +210,7 @@ def city_metadata(city, path_pop_data="C:/DATA/pop_fb"):
             'data_type': 'csv',
             'centroid_tuple': None,
             'path_raw_pop': None,
-            'crs': None},  
+            'crs': None},
         'tokyo': {
             'data_type': 'GeoTif',
             'centroid_tuple': (139.770194, 35.683808),
@@ -215,6 +227,7 @@ def city_metadata(city, path_pop_data="C:/DATA/pop_fb"):
             'path_raw_pop': os.path.join(path_pop_data, "population_pol_2019-07-01.tif"),
             'crs': 32634},
     }
+    print(metadata.keys())
 
     city_meta = metadata[city]
 

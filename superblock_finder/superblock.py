@@ -752,7 +752,8 @@ def find_superblocks(job_id: int, region_of_interest: Region):
                                             gdf_street_areas.to_file(path_streets_superblock)
                                         gdf_street_areas_all = gdf_street_areas_all.append(gdf_street_areas, ignore_index=True)
                                     else:
-                                        raise Exception("WARNING: No superblock area_ {}".format(inter_id))
+                                        print("WARNING: No superblock area_ {}".format(inter_id))
+                                        continue
 
                                 if crit_write_buildings:  # ---Write out buildings
                                     intersecting_buildings = hp_net.get_intersecting_buildings(buildings, superblock_complete)
