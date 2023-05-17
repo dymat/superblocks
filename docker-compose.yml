@@ -6,7 +6,7 @@ services:
       OVERPASS_META: yes
       OVERPASS_MODE: init
       #OVERPASS_PLANET_URL: https://download.geofabrik.de/europe/germany-latest.osm.bz2
-      OVERPASS_PLANET_URL: https://download.geofabrik.de/europe/germany/sachsen-latest.osm.bz2
+      OVERPASS_PLANET_URL: http://download.geofabrik.de/europe/germany/sachsen-latest.osm.bz2
       #OVERPASS_DIFF_URL: http://download.openstreetmap.fr/replication/europe/monaco/minute/
       OVERPASS_RULES_LOAD: 10
     volumes:
