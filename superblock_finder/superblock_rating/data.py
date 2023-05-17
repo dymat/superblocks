@@ -4,17 +4,25 @@ Maintainer: Denny Mattern
 """
 from abc import ABCMeta, abstractmethod
 
-import requests
-from shapely.geometry import Polygon, Point
 import geopandas as gpd
-
+import requests
 from _types import Region
+from shapely.geometry import Polygon, Point
 
 
 class Data(metaclass=ABCMeta):
     @abstractmethod
     def to_geopandas(self):
         return
+
+    @abstractmethod
+    def evaluate(self, blocks: gpd.GeoDataFrame):
+        """
+        Evaluates this data against a list of superblocks
+        :param blocks: list of superblocks
+        :return: gpd.GeoDataFrame
+        """
+        return gpd.GeoDataFrame
 
 
 class OverpassData(Data):
@@ -146,7 +154,6 @@ class OverpassData(Data):
         print(query)
         if r.ok:
             self.data = r.json()
-            print(len(self.to_geopandas()))
 
     def to_geopandas(self):
 
@@ -159,11 +166,18 @@ class OverpassData(Data):
                  elem["tags"]["description"] if "description" in elem["tags"].keys() else "",
                  elem["lat"] if elem["type"] == "node" else elem["center"]["lat"],
                  elem["lon"] if elem["type"] == "node" else elem["center"]["lon"]
-                ]
-            for elem in self.data["elements"]]
+                 ]
+                for elem in self.data["elements"]]
 
         gdf = gpd.GeoDataFrame(columns=["amenity", "name", "description", "lat", "lon"], data=data)
         gdf.geometry = gdf.apply(axis=1, func=lambda row: Point(row.lon, row.lat))
         gdf.set_crs(epsg=4326, inplace=True)
 
         return gdf
+
+    def __len__(self):
+        return len(self.data["elements"])
+
+    def evaluate(self, blocks: gpd.GeoDataFrame):
+        gdf = self.to_geopandas()
+

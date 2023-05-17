@@ -28,6 +28,13 @@ def read_root():
 
 @app.post("/region")
 def add_job(roi: Region):
+
+    osm = OverpassData(roi)
+    osm.get_data()
+
+    with open("/data/osm.json", "w") as f:
+        f.write(json.dumps(osm.to_geopandas().to_json()))
+
     with connect(dbname=environ["POSTGRES_DATABASE"], host=environ["POSTGRES_HOST"], user=environ["POSTGRES_USER"],
                  password=environ["POSTGRES_PASSWORD"]) as con:
         with con.cursor() as cur:
@@ -79,6 +86,9 @@ def add_job(roi: Region):
             buildings_geojson = intersect_buildings.to_json()
             blocks_geojson = all_blocks.to_json()
             blocks_no_street_geojson = blocks_no_street_all.to_json()
+
+            with open("/data/block.json", "w") as f:
+                f.write(json.dumps(blocks_no_street_geojson))
 
             return dict(
                 job_id=job_id,
