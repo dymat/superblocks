@@ -2587,9 +2587,6 @@ def unsimplify(G, G_simplified_original):
                 if node in original_nodes:
                     nodes_on_edge.append(node)
                     G_intermediary.add_node(node)
-                    node_attributes = G_simplified_original.nodes[node]
-                    for attribute, value in node_attributes.items():
-                        G_intermediary[node][attribute] = value
 
             #assert len(nodes_on_edge) == len(set(nodes_on_edge))
             # Get all edges of pnts on edge
