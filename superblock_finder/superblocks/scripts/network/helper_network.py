@@ -2338,7 +2338,7 @@ def calc_edge_and_node_pop_density(
 
     Note: Returns population density per hectar
     """
-    assert pop_points.crs.srs == G.graph['crs']
+    assert pop_points.crs.srs == G.graph['crs'], "This error can be thrown if your area was too small"
 
     tot_circle_area = radius * radius * math.pi / ha_factor  # Convert m2 to ha
         
