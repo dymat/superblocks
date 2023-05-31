@@ -11,11 +11,11 @@ import os
 import sys
 path_superblocks = os.path.abspath(os.path.join(os.path.dirname(__file__), ''))
 sys.path.append(path_superblocks)
-import time
+
 import geopandas as gpd
 import networkx as nx
-from shapely.geometry import Point
 
+from shapely.geometry import Point
 from sqlalchemy import create_engine
 
 from superblocks.scripts.network import helper_osm as hp_osm
@@ -35,21 +35,10 @@ crs_bb = 4326
 crs_overpass = 4326
 
 path_temp = "/data/tmp"
-path_out = "/data/cities"
-path_pop_data = "/deu_pd_2020_1km.tif"  # Download data as outlined from data source in publication
-write_anyway = False
-
-try:
-    os.makedirs(path_out)
-except:
-    pass
-
 try:
     os.makedirs(path_temp)
 except:
     pass
-
-hp_rw.create_folder(path_out)
 
 # Window selection
 length_in_m = 15000  # [m]
@@ -269,7 +258,7 @@ for city in case_studies:
                 G_trolleybus, G_streets, crit_buffer=buffer_dist,
                 min_edge_distance=min_edge_distance, p_min_intersection=p_min_intersection, label='trolleybus')
 
-        nodes, edges = hp_rw.nx_to_gdf(G_streets)
+        _, edges = hp_rw.nx_to_gdf(G_streets)
         edges.to_postgis("street_network_edges_with_attributes", postgis_connection, if_exists="replace")
 
     print("assign_attributes_to_graph finished")
