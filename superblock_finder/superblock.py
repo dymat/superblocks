@@ -348,7 +348,6 @@ def find_superblocks(job_id: int, region_of_interest: Region):
         G_deg3_4, _ = hp_net.get_subgraph_degree(G_deg3_4, degree_nr=3, method='edge_neighbours')
 
         # --- Calculate edge indicators on sub-network
-        G_roads = hp_net.calculate_node_degree(G_deg3_4)
         nodes, edges = hp_rw.nx_to_gdf(G_deg3_4)
         nodes['x'] = nodes.geometry.centroid.x
         nodes['y'] = nodes.geometry.centroid.y
@@ -496,10 +495,6 @@ def find_superblocks(job_id: int, region_of_interest: Region):
     # ---------------------------------------------------
     if final_classification:
         print("... final classification")
-
-        # Original street geometry with all original streets
-        # _, edges = hp_rw.nx_to_gdf(G_roads)
-        # G_street = hp_rw.gdf_to_nx(edges, type='Graph')
         G_street = G_roads
 
         for crit_deviation in crit_deviations:
