@@ -35,6 +35,7 @@ crs_bb = 4326
 crs_overpass = 4326
 
 path_temp = "/data/tmp"
+path_pop_data = "/deu_pd_2020_1km.tif"  # Download data as outlined from data source in publication
 try:
     os.makedirs(path_temp)
 except:
@@ -79,22 +80,18 @@ postgis_connection = create_engine(f"postgresql://{os.getenv('POSTGRES_USER', 'p
 
 
 for city in case_studies:
-    path_out_city = os.path.join(path_out, str(city))
     city_metadata = hp_rw.city_metadata(city, path_pop_data=path_pop_data)
     to_crs_meter = city_metadata['crs']
     path_raw_pop = city_metadata['path_raw_pop']
     centroid_tuple = city_metadata['centroid_tuple']
     print("=== city: {}".format(city))
 
-    hp_rw.create_folder(path_out_city)
 
     # Download first bounding box shp (as WSG84 crs)
     centroid = Point(centroid_tuple)
     centroid = gpd.GeoDataFrame([centroid], columns=['geometry'], crs=crs_bb)
-    #centroid.to_file(os.path.join(path_out_city, "centroid.shp"))
 
     centroid_to_crs_meter = centroid.to_crs("epsg:{}".format(to_crs_meter))
-    #centroid.to_file(os.path.join(path_out_city, "centroid_{}.shp".format(to_crs_meter)))
     bb = hp_osm.BB(
         ymax=centroid_to_crs_meter.geometry.y[0] + length_in_m / 2,
         ymin=centroid_to_crs_meter.geometry.y[0] - length_in_m / 2,
@@ -106,7 +103,6 @@ for city in case_studies:
     # bb to postgis
     bb_gdf.to_postgis("bbox", postgis_connection, if_exists="replace")
 
-    #bb_gdf.to_file(os.path.join(path_out_city, "extent.shp"))
     bb_osm = bb_gdf.to_crs("epsg:{}".format(crs_bb))
     bb = hp_osm.BB(
         ymax=bb_osm.geometry.bounds.maxy[0],
