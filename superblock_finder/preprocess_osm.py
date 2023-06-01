@@ -42,7 +42,7 @@ except:
     pass
 
 # Window selection
-length_in_m = 5000  # [m]
+length_in_m = 15000  # [m]
 radius_pop_density = 100  # [m]
 radius_GFA_density = 100 # [m]
 
@@ -184,9 +184,10 @@ for city in case_studies:
         osm_streets_gdf = hp_net.clip_outer_polygons(osm_streets_gdf, bb_geom)
         osm_streets_gdf = hp_net.remove_all_intersections(osm_streets_gdf) # remove all intersections (lines which overlap)
         osm_streets_gdf = hp_net.remove_rings(osm_streets_gdf)
-        G = hp_rw.gdf_to_nx(osm_streets_gdf)
-        G_simple = hp_net.simplify_network(
-            G, crit_big_roads=False, crit_bus_is_big_street=False)
+        G_streets = hp_rw.gdf_to_nx(osm_streets_gdf)
+        del osm_streets_gdf
+        G_streets = hp_net.simplify_network(
+            G_streets, crit_big_roads=False, crit_bus_is_big_street=False)
 
     print("downloaded simple street: {}".format(city))
     print("... downloaded data {}".format(city))
@@ -194,20 +195,6 @@ for city in case_studies:
     # ==============================================================================
     # Assign  attributes from one graph to another graph
     # ==============================================================================
-
-    if osm_tram_gdf.shape[0] > 0: 
-        # TODO: get tram from postgis
-        G_tram = hp_rw.gdf_to_nx(osm_tram_gdf)
-
-    if osm_bus_gdf.shape[0] > 0: 
-        # TODO: get bus from postgis
-        G_bus = hp_rw.gdf_to_nx(osm_bus_gdf)
-
-    if osm_trolleybus_gdf.shape[0] > 0:
-        # TODO: get trolleybus from postgis
-        G_trolleybus = hp_rw.gdf_to_nx(osm_trolleybus_gdf)
-
-    G_streets = G_simple
 
     # Remove footway (new)
     G_streets = hp_net.remove_edge_by_attribute(G_streets, attribute='tags.highway', value="footway")
@@ -221,25 +208,34 @@ for city in case_studies:
     G_streets = hp_net.simplify_network(
         G_streets, crit_big_roads=False, crit_bus_is_big_street=False)
 
-    nx.set_edge_attributes(G_streets, 0, 'tram')
     nx.set_edge_attributes(G_streets, 0, 'bus')
+    nx.set_edge_attributes(G_streets, 0, 'tram')
     nx.set_edge_attributes(G_streets, 0, 'trolleybus')
 
-    if osm_bus_gdf.shape[0] > 0:
-        # TODO: get bus, tram and trollybus from postgis
+    if osm_bus_gdf.shape[0] > 0: 
+        # TODO: get bus from postgis
+        G_bus = hp_rw.gdf_to_nx(osm_bus_gdf)
         G_streets = hp_net.check_if_paralell_lines(
             G_bus, G_streets, crit_buffer=buffer_dist,
             min_edge_distance=min_edge_distance, p_min_intersection=p_min_intersection, label='bus')
+    del osm_bus_gdf
 
-    if osm_tram_gdf.shape[0] > 0:
+    if osm_tram_gdf.shape[0] > 0: 
+        # TODO: get tram from postgis
+        G_tram = hp_rw.gdf_to_nx(osm_tram_gdf)
         G_streets = hp_net.check_if_paralell_lines(
             G_tram, G_streets, crit_buffer=buffer_dist,
             min_edge_distance=min_edge_distance, p_min_intersection=p_min_intersection, label='tram')
+    del osm_tram_gdf
+
 
     if osm_trolleybus_gdf.shape[0] > 0:
+        # TODO: get trolleybus from postgis
+        G_trolleybus = hp_rw.gdf_to_nx(osm_trolleybus_gdf)
         G_streets = hp_net.check_if_paralell_lines(
             G_trolleybus, G_streets, crit_buffer=buffer_dist,
             min_edge_distance=min_edge_distance, p_min_intersection=p_min_intersection, label='trolleybus')
+    del osm_trolleybus_gdf
 
 
     print("assign_attributes_to_graph finished")
@@ -253,7 +249,6 @@ for city in case_studies:
     # TODO: get street edges with attributes from postgis
     
     _, gdf_street = hp_rw.nx_to_gdf(G_streets)
-    G = G_streets
 
     # Get bounding box
     bb = hp_osm.BB(
@@ -272,18 +267,18 @@ for city in case_studies:
     pop_pnts.to_postgis("fb_pop", postgis_connection, if_exists="replace")
 
     # ----Calculate population density
-    G = hp_net.calc_edge_and_node_pop_density(
-        G,
+    G_streets = hp_net.calc_edge_and_node_pop_density(
+        G_streets,
         pop_pnts,
         radius=radius_pop_density,
         attribute_pop='population',
         label='pop_den')
 
     # ----Calculate GFA density based on osm buildings
-    G = hp_net.calc_GFA_density(G, osm_buildings_gdf, radius=radius_GFA_density, label='GFA_den')
+    G_streets = hp_net.calc_GFA_density(G_streets, osm_buildings_gdf, radius=radius_GFA_density, label='GFA_den')
 
     print("writing out shp")
-    nodes, edges = hp_rw.nx_to_gdf(G)
+    nodes, edges = hp_rw.nx_to_gdf(G_streets)
 
     nodes.to_postgis("street_network_nodes_with_attributes_pop_density", postgis_connection, if_exists="replace")
     edges.to_postgis("street_network_edges_with_attributes_pop_density", postgis_connection, if_exists="replace")
