@@ -42,7 +42,7 @@ except:
     pass
 
 # Window selection
-length_in_m = 15000  # [m]
+length_in_m = 5000  # [m]
 radius_pop_density = 100  # [m]
 radius_GFA_density = 100 # [m]
 
@@ -188,13 +188,6 @@ for city in case_studies:
         G_simple = hp_net.simplify_network(
             G, crit_big_roads=False, crit_bus_is_big_street=False)
 
-        print("main func", G_simple)
-        nodes, edges = hp_rw.nx_to_gdf(G_simple)
-        print("Streets", edges.shape)
-
-        nodes.to_postgis("street_network_nodes", postgis_connection, if_exists="replace")
-        edges.to_postgis("street_network_edges", postgis_connection, if_exists="replace")
-
     print("downloaded simple street: {}".format(city))
     print("... downloaded data {}".format(city))
 
@@ -214,48 +207,40 @@ for city in case_studies:
         # TODO: get trolleybus from postgis
         G_trolleybus = hp_rw.gdf_to_nx(osm_trolleybus_gdf)
 
-    gdf_streets = edges
-    if gdf_streets.shape[0] > 0:
-        # TODO: get street (=edges) from postgis
-        if G_simple:
-            G_streets = G_simple
-        else:
-            G_streets = hp_rw.gdf_to_nx(gdf_streets)
+    G_streets = G_simple
 
-        # Remove footway (new)
-        G_streets = hp_net.remove_edge_by_attribute(G_streets, attribute='tags.highway', value="footway")
-        G_streets = hp_net.G_multilinestring_to_linestring(G_streets, single_segments=True)
+    # Remove footway (new)
+    G_streets = hp_net.remove_edge_by_attribute(G_streets, attribute='tags.highway', value="footway")
+    G_streets = hp_net.G_multilinestring_to_linestring(G_streets, single_segments=True)
 
-        # Criteria which influcence how graphs are spatially merged
-        buffer_dist = 10        # [m]
-        min_edge_distance = 10  # [m]
-        p_min_intersection = 80 # [m] minimum edge percentage which needs to be intersected
+    # Criteria which influcence how graphs are spatially merged
+    buffer_dist = 10        # [m]
+    min_edge_distance = 10  # [m]
+    p_min_intersection = 80 # [m] minimum edge percentage which needs to be intersected
 
-        G_streets = hp_net.simplify_network(
-            G_streets, crit_big_roads=False, crit_bus_is_big_street=False)
+    G_streets = hp_net.simplify_network(
+        G_streets, crit_big_roads=False, crit_bus_is_big_street=False)
 
-        nx.set_edge_attributes(G_streets, 0, 'tram')
-        nx.set_edge_attributes(G_streets, 0, 'bus')
-        nx.set_edge_attributes(G_streets, 0, 'trolleybus')
+    nx.set_edge_attributes(G_streets, 0, 'tram')
+    nx.set_edge_attributes(G_streets, 0, 'bus')
+    nx.set_edge_attributes(G_streets, 0, 'trolleybus')
 
-        if osm_bus_gdf.shape[0] > 0:
-            # TODO: get bus, tram and trollybus from postgis
-            G_streets = hp_net.check_if_paralell_lines(
-                G_bus, G_streets, crit_buffer=buffer_dist,
-                min_edge_distance=min_edge_distance, p_min_intersection=p_min_intersection, label='bus')
+    if osm_bus_gdf.shape[0] > 0:
+        # TODO: get bus, tram and trollybus from postgis
+        G_streets = hp_net.check_if_paralell_lines(
+            G_bus, G_streets, crit_buffer=buffer_dist,
+            min_edge_distance=min_edge_distance, p_min_intersection=p_min_intersection, label='bus')
 
-        if osm_tram_gdf.shape[0] > 0:
-            G_streets = hp_net.check_if_paralell_lines(
-                G_tram, G_streets, crit_buffer=buffer_dist,
-                min_edge_distance=min_edge_distance, p_min_intersection=p_min_intersection, label='tram')
+    if osm_tram_gdf.shape[0] > 0:
+        G_streets = hp_net.check_if_paralell_lines(
+            G_tram, G_streets, crit_buffer=buffer_dist,
+            min_edge_distance=min_edge_distance, p_min_intersection=p_min_intersection, label='tram')
 
-        if osm_trolleybus_gdf.shape[0] > 0:
-            G_streets = hp_net.check_if_paralell_lines(
-                G_trolleybus, G_streets, crit_buffer=buffer_dist,
-                min_edge_distance=min_edge_distance, p_min_intersection=p_min_intersection, label='trolleybus')
+    if osm_trolleybus_gdf.shape[0] > 0:
+        G_streets = hp_net.check_if_paralell_lines(
+            G_trolleybus, G_streets, crit_buffer=buffer_dist,
+            min_edge_distance=min_edge_distance, p_min_intersection=p_min_intersection, label='trolleybus')
 
-        _, edges = hp_rw.nx_to_gdf(G_streets)
-        edges.to_postgis("street_network_edges_with_attributes", postgis_connection, if_exists="replace")
 
     print("assign_attributes_to_graph finished")
 
@@ -266,11 +251,9 @@ for city in case_studies:
 
     # Load facebook popluation data
     # TODO: get street edges with attributes from postgis
-    gdf_street = edges
-    if G_streets:
-        G = G_streets
-    else:
-        G = hp_rw.gdf_to_nx(gdf_street)
+    
+    _, gdf_street = hp_rw.nx_to_gdf(G_streets)
+    G = G_streets
 
     # Get bounding box
     bb = hp_osm.BB(
