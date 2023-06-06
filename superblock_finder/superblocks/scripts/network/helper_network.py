@@ -2118,7 +2118,7 @@ def remove_rings(gdf):
     
     return gdf
 
-def simplify_network(G, crit_big_roads=True, crit_bus_is_big_street=False):
+def simplify_network(G):
     """Agglomerate all edges which are between two nodes
     which have neighbours into a SingleLine with multiple coordinates
     Note: Works on graph --> if Digraph, then do not simplify those loop-elements
@@ -2135,11 +2135,9 @@ def simplify_network(G, crit_big_roads=True, crit_bus_is_big_street=False):
     G_new_edges.graph = G.graph
 
     # Convert to undirected (if directed, use oneway attribute to reset)
-    if_directed_input = False
     directed_crit = G.is_directed()
     if directed_crit:
         G = G.to_undirected()
-        if_directed_input = True
 
     nodes_to_remove = []
 
@@ -2196,9 +2194,7 @@ def simplify_network(G, crit_big_roads=True, crit_bus_is_big_street=False):
 
                     # Iterate and copy if an attribute is in one but not the other
                     for attr in incoming_attr.keys():
-                        if incoming_attr[attr] == None and outcoming_attr[attr] != None:
-                            incoming_attr[attr] = outcoming_attr[attr]  # Overwrite
-                        elif incoming_attr[attr] == 0 and outcoming_attr[attr] != 0: # if e.g. no bride and other is yes
+                        if incoming_attr[attr] != outcoming_attr[attr]:
                             incoming_attr[attr] = outcoming_attr[attr]  # Overwrite
 
                     incoming_attr['geometry'] = merged_line
@@ -2221,7 +2217,7 @@ def simplify_network(G, crit_big_roads=True, crit_bus_is_big_street=False):
     G = nx.compose(G, G_new_edges)
 
     # Add undirected again
-    if if_directed_input:
+    if directed_crit:
         G = undirected_to_directed(G, label='tags.one')
     
     G.graph['crs'] = crs_from
@@ -2739,44 +2735,19 @@ def remove_all_intersections(gdf):
 
     attributes_list = []
     bar = Bar('Checking if intersections: ', max=gdf_without_columns.shape[0])
+    lines_bb = list(gdf_tree.intersection(line_to_check.bounds))
 
     for gdf_index in gdf_without_columns.index:
         line_to_check = gdf_without_columns.loc[gdf_index].geometry
-        lines_bb = list(gdf_tree.intersection(line_to_check.bounds))
-        #lines_bb = list(gdf_tree.contains(line_to_check.bounds))
 
-        crit_overlap = False
         # Get line with largest intersection
-        intersection_length = 0
         for tree_index in lines_bb:
             line_in_bb = gdf.iloc[tree_index].geometry
 
-            #if line_to_check.buffer(0.5).contains(line_in_bb):
             if line_in_bb.buffer(0.5).contains(line_to_check):
                 attributes = gdf.iloc[tree_index].values.tolist()
-                crit_overlap = True
+                attributes_list.append(attributes)
                 break
-            '''else:
-                # Intersection but no crossing
-                # Note use small buffer to make sure that intersection
-                intersection_obj = line_to_check.buffer(0.5).intersection(line_in_bb)
-                length = intersection_obj.length
-                if gdf.iloc[tree_index]['tags.name'] == 'TESTSTR':
-                    print("INTERLEN: {}".format(length))
-                    print("-")
-
-                if intersection_obj.type == 'LineString' and length > intersection_length:
-                    attributes = gdf.iloc[tree_index].values.tolist()
-                    crit_overlap = True
-                    intersection_length = length
-                else:
-                    pass
-            '''
-        if crit_overlap:
-            attributes_list.append(attributes)
-        else:
-            raise Exception("No matching line found for trasnferring attributes")
-            print("No matching line found for trasnferring attributes")
         bar.next()
     bar.finish()
 

@@ -187,7 +187,7 @@ for city in case_studies:
         G_streets = hp_rw.gdf_to_nx(osm_streets_gdf)
         del osm_streets_gdf
         G_streets = hp_net.simplify_network(
-            G_streets, crit_big_roads=False, crit_bus_is_big_street=False)
+            G_streets)
 
     print("downloaded simple street: {}".format(city))
     print("... downloaded data {}".format(city))
@@ -206,7 +206,7 @@ for city in case_studies:
     p_min_intersection = 80 # [m] minimum edge percentage which needs to be intersected
 
     G_streets = hp_net.simplify_network(
-        G_streets, crit_big_roads=False, crit_bus_is_big_street=False)
+        G_streets)
 
     nx.set_edge_attributes(G_streets, 0, 'bus')
     nx.set_edge_attributes(G_streets, 0, 'tram')

@@ -209,13 +209,13 @@ def find_superblocks(job_id: int, region_of_interest: Region):
         # Simplify
         G_roads = hp_rw.gdf_to_nx(edges)
         G_roads = hp_net.simplify_network(
-            G_roads, crit_bus_is_big_street=crit_bus_is_big_street)
+            G_roads)
         G_roads = hp_net.calculate_node_degree(G_roads)
 
         # Geometric simplification
         G_roads = hp_net.geometric_simplification(G_roads, max_distance=max_distance_node_merging)
         G_roads = hp_net.calculate_node_degree(G_roads)
-        G_roads = hp_net.simplify_network(G_roads, crit_bus_is_big_street=crit_bus_is_big_street)
+        G_roads = hp_net.simplify_network(G_roads)
 
         # Remove self loops
         G_roads.remove_edges_from(nx.selfloop_edges(G_roads))
@@ -223,7 +223,7 @@ def find_superblocks(job_id: int, region_of_interest: Region):
 
         # Remove small zufahrt
         G_roads = hp_net.remove_zufahrt(G_roads, max_length=max_length_driveway)
-        G_roads = hp_net.simplify_network(G_roads, crit_bus_is_big_street=crit_bus_is_big_street)
+        G_roads = hp_net.simplify_network(G_roads)
 
         G = G_roads
 
@@ -257,7 +257,7 @@ def find_superblocks(job_id: int, region_of_interest: Region):
         G = hp_net.remove_edge_by_attribute(G, 'loc_conn', 1)
         G.remove_nodes_from(list(nx.isolates(G)))
 
-        G = hp_net.simplify_network(G, crit_bus_is_big_street=crit_bus_is_big_street)
+        G = hp_net.simplify_network(G)
         G.remove_edges_from(nx.selfloop_edges(G))
         G = hp_net.calculate_node_degree(G)
 
