@@ -1,7 +1,7 @@
-import React, {useState, useRef} from 'react';
-import Dashboard from './dashboard/Dashboard'
+import React, {useState, useRef, useEffect} from 'react';
+import Dashboard from './dashboard/Dashboard';
 import {MapContainer, TileLayer, FeatureGroup, GeoJSON} from "react-leaflet";
-import {EditControl} from "react-leaflet-draw"
+import {EditControl} from "react-leaflet-draw";
 
 function App() {
     const [roi, setRoi] = useState([])
@@ -18,6 +18,24 @@ function App() {
     const [selectedSuperblock, setSelectedSuperblock] = useState(null)
     const [appStatus, setAppStatus] = useState("ready")
     const [stepperState, setStepperState] = useState(0)
+    const [map, setMap] = React.useState(null);
+    const [zoom, setZoom] = React.useState(13);
+    const [city, setCity] = React.useState("berlin")
+    const [cityList, setCityList] = React.useState(["berlin"])
+
+    
+    useEffect(() => {
+        setAppStatus('loading')
+
+        fetch("http://localhost:9123/city_list")
+            .then(response => response.json())
+            .then(json => {
+                console.log(json.list);
+                setCityList(json.list)})
+            .then(() => setAppStatus('ready'))
+            .catch(() => setAppStatus("error")) 
+
+    }, [])
 
     const handleStopDraw = e => {
         /*
@@ -48,7 +66,7 @@ function App() {
         setAppStatus('loading')
 
         const data = {
-            name: "Berlin",
+            name: city,
             coords: roi
         }
 
@@ -67,6 +85,32 @@ function App() {
             .then(() => setAppStatus('ready'))
             .then(() => setStepperState(prevState => prevState + 1))
             .catch(() => setAppStatus("error"))
+    }
+
+    const handleChangedCenter = (cityname) => {
+        setAppStatus('loading')
+
+        const data = {
+            name: cityname[0]
+        }
+
+        fetch("http://localhost:9123/city", {
+            method: "POST",
+            mode: "cors",
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            redirect: 'follow',
+            referrerPolicy: 'no-referrer',
+            body: JSON.stringify(data)
+        })
+            .then(response => response.json())
+            .then(json => {
+                console.log(json);
+                map.flyTo([json.lat, json.long]);
+                setCity(cityname);})
+            .then(() => setAppStatus('ready'))
+            .catch(() => setAppStatus("error")) 
     }
 
 
@@ -127,12 +171,15 @@ function App() {
         handleNextStep={handleNextStep}
         handleBackStep={handleBackStep}
         handleReset={handleReset}
+        handleChangedCenter={handleChangedCenter}
+        cityList={cityList}
     >
         <MapContainer center={[52.509, 13.385]}
-                      zoom={13}
+                      zoom={zoom}
                       scrollWheelZoom={true}
                       zoomControl={false}
-                      style={{display: "flex", width: "100%", minHeight: 800, height: "100%"}}>
+                      style={{display: "flex", width: "100%", minHeight: 800, height: "100%"}}
+                      ref={setMap}>
             <TileLayer
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
@@ -167,7 +214,6 @@ function App() {
 
                 }
             </FeatureGroup>
-
         </MapContainer>
     </Dashboard>
 }

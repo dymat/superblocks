@@ -9,10 +9,7 @@ import List from '@mui/material/List';
 import Typography from '@mui/material/Typography';
 import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
-import ModeStandbyRoundedIcon from '@mui/icons-material/ModeStandbyRounded';
 import Container from '@mui/material/Container';
-import Grid from '@mui/material/Grid';
-import Paper from '@mui/material/Paper';
 import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ListItemIcon from "@mui/material/ListItemIcon";
@@ -20,7 +17,7 @@ import DashboardIcon from "@mui/icons-material/Dashboard";
 import ListItemText from "@mui/material/ListItemText";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListSubheader from "@mui/material/ListSubheader";
-import Popper from "@mui/material/Popper";
+import {Select, FormControl, InputLabel, MenuItem} from "@mui/material";
 
 import CenteredTabs from './AppBarTabs'
 import ControlledAccordions from './Accordion'
@@ -86,10 +83,36 @@ const AccordionContainer = styled(Container, {shouldForwardProp: (prop) => prop 
     }),
 );
 
+const CityListContainer = styled(Container, {shouldForwardProp: (prop) => prop !== 'open'})(
+    ({theme, open}) => ({
+        position:"absolute",
+        zIndex: theme.zIndex.appBar - 10,
+        bottom:"0px",
+        width: 600,
+        height: 100,
+        left: open ? drawerWidth : 72,
+        transition: theme.transitions.create('left', {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.enteringScreen,
+        }),
+    }),
+);
+
 const mdTheme = createTheme();
 
 function Dashboard(props) {
     const [open, setOpen] = React.useState(false);
+    const [city, setCity] = React.useState("");
+
+    const handleCityChange = (event) => {
+        setCity(event.target.value);
+        props.handleChangedCenter(event.target.value)
+    };
+
+    const cityListElements = props.cityList.map((cityname, index) =>
+        <MenuItem key={index} value={cityname}>{cityname}</MenuItem>
+    )
+
     const toggleDrawer = () => {
         setOpen(!open);
     };
@@ -248,6 +271,25 @@ function Dashboard(props) {
                     <AccordionContainer open={open}>
                         <ControlledAccordions {...props} />
                     </AccordionContainer>
+
+                    <CityListContainer open={open}>
+                        <FormControl
+                        position={'bottomleft'}>
+                            <InputLabel id="select-city-label">Stadt</InputLabel>
+                            <Select
+                                sx={{ backgroundColor:'white',
+                                        minWidth: 100}}
+                                labelId="elect-city-label"
+                                id="select-city"
+                                value={city}
+                                label="Stadt"
+                                onChange={handleCityChange}
+                            >
+                                {cityListElements}
+                            </Select>
+                        </FormControl>
+
+                    </CityListContainer>
 
 
                 </Box>
