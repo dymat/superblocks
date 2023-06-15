@@ -2338,7 +2338,7 @@ def calc_edge_and_node_pop_density(
 
     Note: Returns population density per hectar
     """
-    assert pop_points.crs.srs == G.graph['crs']
+    assert pop_points.crs.srs == G.graph['crs'], "This error can be thrown if your area was too small"
 
     tot_circle_area = radius * radius * math.pi / ha_factor  # Convert m2 to ha
         
@@ -2587,9 +2587,6 @@ def unsimplify(G, G_simplified_original):
                 if node in original_nodes:
                     nodes_on_edge.append(node)
                     G_intermediary.add_node(node)
-                    node_attributes = G_simplified_original.nodes[node]
-                    for attribute, value in node_attributes.items():
-                        G_intermediary[node][attribute] = value
 
             #assert len(nodes_on_edge) == len(set(nodes_on_edge))
             # Get all edges of pnts on edge
