@@ -7,7 +7,7 @@ import StepContent from '@mui/material/StepContent';
 import Button from '@mui/material/Button';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
-import CircularProgress from '@mui/material/CircularProgress';
+import LoadingButton from '@mui/lab/LoadingButton';
 
 const steps = [
     {
@@ -27,7 +27,9 @@ const steps = [
     },
 ];
 
+
 export default function WorkflowStepper(props) {
+    const [calcTime, setCalcTime] = React.useState(-1);
     return (
         <Box>
             <Stepper activeStep={props.stepperState} orientation="vertical">
@@ -40,6 +42,11 @@ export default function WorkflowStepper(props) {
                         </StepLabel>
                         <StepContent>
                             <Typography sx={{userSelect: 'none'}}>
+                                {props.stepperState === 1 ? 
+                                <span>
+                                    Berechnungszeit {(performance.now() - calcTime)/1000} Sekunden
+                                    <br></br><br></br>
+                                </span> : null}
                                 {step.description}
                                 {props.stepperState === 0
                                     ? <span style={{ display: 'inline-flex'}}>
@@ -59,14 +66,19 @@ export default function WorkflowStepper(props) {
                                         Zurück
                                     </Button>
 
-                                    <Button
-                                        disabled={props.appStatus === 'loading'}
+                                    <LoadingButton
+                                        loading={props.appStatus === "loading"}
+                                        loadingPosition="end"
                                         variant="contained"
-                                        onClick={props.handleNextStep}
+                                        onClick =  {() => {
+                                            setCalcTime(performance.now());
+                                            props.handleNextStep();
+                                        }}
                                         sx={{ mt: 1, mr: 1 }}
                                     >
-                                        {index === steps.length - 1 ? 'Fertig' : 'Weiter'}
-                                    </Button>
+                                        {index === steps.length - 1 ? 'Fertig' : 
+                                            props.appStatus === "loading" && props.stepperState === 0? "Berechne Superblocks..." : 'Weiter'}
+                                    </LoadingButton>
                                 </div>
                             </Box>
                         </StepContent>
