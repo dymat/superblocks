@@ -225,27 +225,7 @@ def find_superblocks(job_id: int, region_of_interest: Region):
         G_roads = hp_net.remove_zufahrt(G_roads, max_length=max_length_driveway)
         G_roads = hp_net.simplify_network(G_roads, crit_bus_is_big_street=crit_bus_is_big_street)
 
-        nodes, edges = hp_rw.nx_to_gdf(G_roads)
-        #edges.to_file(os.path.join(path_temp, 'simplified_edges.shp'))
-        #nodes.to_file(os.path.join(path_temp, 'simplified_nodes.shp'))
-
-        edges["job_id"] = job_id
-        nodes["job_id"] = job_id
-
-        edges.to_postgis("simplified_edges", postgis_connection, if_exists="append")
-        nodes.to_postgis("simplified_nodes", postgis_connection, if_exists="append")
-        print("...Simplified network")
-
-    # ==============================================================================
-    # Superblock classification
-    # ==============================================================================
-    if calculation_of_indicators:
-        gdf_roads = edges
-        #gdf_roads = gpd.read_file(os.path.join(path_temp, "simplified_edges.shp"))
-
-        G = hp_rw.gdf_to_nx(gdf_roads)
-        G = nx.to_undirected(G)
-        G = nx.Graph(G)
+        G = G_roads
 
         # Calculate measures
         G = hp_net.calc_eccentricity(G, 'eccentr')
@@ -368,7 +348,6 @@ def find_superblocks(job_id: int, region_of_interest: Region):
         G_deg3_4, _ = hp_net.get_subgraph_degree(G_deg3_4, degree_nr=3, method='edge_neighbours')
 
         # --- Calculate edge indicators on sub-network
-        G_roads = hp_net.calculate_node_degree(G_deg3_4)
         nodes, edges = hp_rw.nx_to_gdf(G_deg3_4)
         nodes['x'] = nodes.geometry.centroid.x
         nodes['y'] = nodes.geometry.centroid.y
@@ -516,13 +495,7 @@ def find_superblocks(job_id: int, region_of_interest: Region):
     # ---------------------------------------------------
     if final_classification:
         print("... final classification")
-
-        # Original street geometry with all original streets
-        gdf_street = gpd.read_postgis(
-            f'SELECT * FROM simplified_edges as A '
-            f'WHERE A."job_id" = {job_id}',
-            postgis_connection, geom_col="geometry")
-        G_street = hp_rw.gdf_to_nx(gdf_street, type='Graph')
+        G_street = G_roads
 
         for crit_deviation in crit_deviations:
 
