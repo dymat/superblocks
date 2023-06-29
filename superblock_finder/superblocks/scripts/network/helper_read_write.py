@@ -2,11 +2,10 @@
 but customized
 """
 import os
-import json
 import networkx as nx
 import geopandas as gpd
 import logging
-from shapely.geometry import Point, mapping, shape
+from shapely.geometry import Point
 
 def city_labels():
     """Labels
@@ -288,15 +287,11 @@ def gdf_to_nx(
     Geometry attribute but is stored on edge as 'geometry'
 
     """
-    assert 'geometry' in gdf_network.columns.tolist()
+    fields = list(gdf_network.columns)
+
+    assert 'geometry' in fields
     assert gdf_network.index.is_unique
     assert gdf_network.crs.srs  # note None
-
-    # Add jason and wkt geometry
-    #gdf_network['wkt'] = [i.wkt for i in gdf_network.geometry]
-    #gdf_network.loc['Json'] = [json.dumps(mapping(i)) for i in gdf_network.geometry] 
-
-    fields = list(gdf_network.columns)
 
     if type == 'MultiGraph':
         G = nx.MultiGraph()
@@ -307,29 +302,22 @@ def gdf_to_nx(
 
     G.graph['crs'] = gdf_network.crs
 
-    for index, row in gdf_network.explode().iterrows():
-        first = row.geometry.coords[0]
-        last = row.geometry.coords[-1]
-        geometry = row.geometry
-
-        data = [row[f] for f in fields]
-        attributes = dict(zip(fields, data))
-        if directional:
-            if row[tag_label] == 'yes':
-                G.add_edge(first, last, **attributes)
-                G.edges[(first, last)]['geometry'] = geometry
-            else:
-                G.add_edge(first, last, **attributes)
-                G.add_edge(last, first, **attributes)
-                G.edges[(first, last)]['geometry'] = geometry
-                G.edges[(last, first)]['geometry'] = geometry
-        else:
-            G.add_edge(first, last, **attributes)
-            #G.add_edge(last, first, **attributes)
-            G.edges[(first, last)]['geometry'] = geometry
-            #G.edges[(last, first)]['geometry'] = geometry  #Note: MAYBE WRONG DIRECTION
-
+    gdf_network.explode().apply(row_to_graph, args=(G, directional, fields, tag_label), axis=1)
     return G
+
+def row_to_graph(row, graph, directional, fields, tag_label):
+    first = row.geometry.coords[0]
+    last = row.geometry.coords[-1]
+
+    attributes = {field: row[field] for field in fields}
+    if directional:
+        if row[tag_label] == 'yes':
+            graph.add_edge(first, last, **attributes)
+        else:
+            graph.add_edge(first, last, **attributes)
+            graph.add_edge(last, first, **attributes)
+    else:
+        graph.add_edge(first, last, **attributes)
 
 
 def _points_to_gdf(net):
