@@ -731,34 +731,26 @@ def clip_outer_polygons(gdf, bb):
     """Clip polygons by bb
     """
     gdf = gdf.reset_index(drop=True)
-    #print("clip_outer_polygons 734", gdf.shape, bb)
 
-    generic_index = -100
+    generic_index = -1 #seems like this should never arrive at 0, otherwise real data might be overwritten by line 751
     index_to_remove = []
-    for gdf_index in gdf.index:
+    for gdf_index, row in gdf.iterrows():
 
-        polygon = gdf.loc[gdf_index].geometry
-
-    #    print(
-    #        "polygon", polygon, "\n",
-    #        "bbox", bb, "\n",
-    #        "bbox contains polygon", bb.contains(polygon), "\n",
-    #        "bbox intersects polygon", bb.intersects(polygon), "\n",
-    #    )
+        polygon = row.geometry
 
         if bb.contains(polygon):
-            pass
+            continue
         elif bb.intersects(polygon):
             intersection = polygon.intersection(bb)
             if intersection.type == 'MultiLineString' or intersection.type == 'MultiPolygon':
                 generic_index -= 1
-                elements = gdf.loc[gdf_index]
+                elements = row
                 for geometry_element in intersection:
                     elements['geometry'] = geometry_element
                     for key, value in elements.items():
                         gdf.at[generic_index, key] = value
             else:
-                gdf.at[gdf_index, 'geometry'] = intersection
+                row.geometry = intersection
         else:
             index_to_remove.append(gdf_index)
 
@@ -2106,19 +2098,14 @@ def undirected_to_directed(G, label='tags.one'):
 def remove_rings(gdf):
     """remove rings in gdf
     """
-    index_to_drop = []
-    for index in gdf.index:
-        geometry = gdf.loc[index].geometry
-
-        if geometry.is_ring:
-            index_to_drop.append(index)
+    index_to_drop = gdf[gdf.apply(lambda row: row.geometry.is_ring, axis = 1)].index.tolist()
     print("Number of rings which are removed: {}".format(len(index_to_drop)))
     gdf = gdf.drop(index=index_to_drop)
     gdf = gdf.reset_index(drop=True)
     
     return gdf
 
-def simplify_network(G, crit_big_roads=True, crit_bus_is_big_street=False):
+def simplify_network(G):
     """Agglomerate all edges which are between two nodes
     which have neighbours into a SingleLine with multiple coordinates
     Note: Works on graph --> if Digraph, then do not simplify those loop-elements
@@ -2135,11 +2122,9 @@ def simplify_network(G, crit_big_roads=True, crit_bus_is_big_street=False):
     G_new_edges.graph = G.graph
 
     # Convert to undirected (if directed, use oneway attribute to reset)
-    if_directed_input = False
     directed_crit = G.is_directed()
     if directed_crit:
         G = G.to_undirected()
-        if_directed_input = True
 
     nodes_to_remove = []
 
@@ -2196,9 +2181,7 @@ def simplify_network(G, crit_big_roads=True, crit_bus_is_big_street=False):
 
                     # Iterate and copy if an attribute is in one but not the other
                     for attr in incoming_attr.keys():
-                        if incoming_attr[attr] == None and outcoming_attr[attr] != None:
-                            incoming_attr[attr] = outcoming_attr[attr]  # Overwrite
-                        elif incoming_attr[attr] == 0 and outcoming_attr[attr] != 0: # if e.g. no bride and other is yes
+                        if incoming_attr[attr] != outcoming_attr[attr]:
                             incoming_attr[attr] = outcoming_attr[attr]  # Overwrite
 
                     incoming_attr['geometry'] = merged_line
@@ -2221,7 +2204,7 @@ def simplify_network(G, crit_big_roads=True, crit_bus_is_big_street=False):
     G = nx.compose(G, G_new_edges)
 
     # Add undirected again
-    if if_directed_input:
+    if directed_crit:
         G = undirected_to_directed(G, label='tags.one')
     
     G.graph['crs'] = crs_from
@@ -2740,43 +2723,18 @@ def remove_all_intersections(gdf):
     attributes_list = []
     bar = Bar('Checking if intersections: ', max=gdf_without_columns.shape[0])
 
-    for gdf_index in gdf_without_columns.index:
-        line_to_check = gdf_without_columns.loc[gdf_index].geometry
+    for _, row in gdf_without_columns.iterrows():
+        line_to_check = row.geometry
         lines_bb = list(gdf_tree.intersection(line_to_check.bounds))
-        #lines_bb = list(gdf_tree.contains(line_to_check.bounds))
 
-        crit_overlap = False
         # Get line with largest intersection
-        intersection_length = 0
         for tree_index in lines_bb:
             line_in_bb = gdf.iloc[tree_index].geometry
 
-            #if line_to_check.buffer(0.5).contains(line_in_bb):
             if line_in_bb.buffer(0.5).contains(line_to_check):
                 attributes = gdf.iloc[tree_index].values.tolist()
-                crit_overlap = True
+                attributes_list.append(attributes)
                 break
-            '''else:
-                # Intersection but no crossing
-                # Note use small buffer to make sure that intersection
-                intersection_obj = line_to_check.buffer(0.5).intersection(line_in_bb)
-                length = intersection_obj.length
-                if gdf.iloc[tree_index]['tags.name'] == 'TESTSTR':
-                    print("INTERLEN: {}".format(length))
-                    print("-")
-
-                if intersection_obj.type == 'LineString' and length > intersection_length:
-                    attributes = gdf.iloc[tree_index].values.tolist()
-                    crit_overlap = True
-                    intersection_length = length
-                else:
-                    pass
-            '''
-        if crit_overlap:
-            attributes_list.append(attributes)
-        else:
-            raise Exception("No matching line found for trasnferring attributes")
-            print("No matching line found for trasnferring attributes")
         bar.next()
     bar.finish()
 
@@ -2785,6 +2743,9 @@ def remove_all_intersections(gdf):
     
     gpd_no_intersections = gpd.GeoDataFrame(
         df_attributes, geometry=gdf_without_columns.geometry, crs=gdf.crs)
+    
+    print(f"gdf with intersections {gdf.shape}")
+    print(f"gdf without intersections {gpd_no_intersections.shape}")
     
     return gpd_no_intersections     
 
