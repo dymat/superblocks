@@ -24,7 +24,7 @@ postgis_connection = create_engine(f"postgresql://{os.getenv('POSTGRES_USER', 'p
 
 
 
-def execute_flow(city, crit_deviations, path_results, path_city_raw):
+def execute_flow(city, crit_deviation, path_results, path_city_raw):
     """Edmond-Karps
     """
     calculate_base_flow = True
@@ -32,8 +32,6 @@ def execute_flow(city, crit_deviations, path_results, path_city_raw):
 
     # Paths
     path_temp = os.path.join(path_results, str(city))
-    path_intervention = os.path.join(path_temp, 'cleaned_edges.shp')
-    path_bb = os.path.join(path_city_raw, str(city), "extent.shp")
     flow_folder = '_flows'
     path_out = os.path.join(path_temp, flow_folder)
     hp_rw.create_folder(path_out)
@@ -182,178 +180,18 @@ def execute_flow(city, crit_deviations, path_results, path_city_raw):
 
         G_global = hp_rw.gdf_to_nx(gdf_global)
 
-        for crit_deviation in crit_deviations:
-            #print("... copying attributes to file {}".format(crit_deviation))
-            # Load file with crit dev results
+        #print("... copying attributes to file {}".format(crit_deviation))
+        # Load file with crit dev results
 
-            gdf_destination = gpd.read_postgis(f'SELECT * FROM "classified_edges_{crit_deviation}"', postgis_connection, geom_col="geometry")
+        gdf_destination = gpd.read_postgis(f'SELECT * FROM "classified_edges_{crit_deviation}"', postgis_connection, geom_col="geometry")
 
-            G_destination = hp_rw.gdf_to_nx(gdf_destination)
-            for edge in G_global.edges:
-                if edge in G_destination.edges:
-                    G_destination.edges[edge]['flow_ov'] = G_global.edges[edge]['flow_ov']
+        G_destination = hp_rw.gdf_to_nx(gdf_destination)
+        for edge in G_global.edges:
+            if edge in G_destination.edges:
+                G_destination.edges[edge]['flow_ov'] = G_global.edges[edge]['flow_ov']
 
-            _, edges = hp_rw.nx_to_gdf(G_destination)
+        _, edges = hp_rw.nx_to_gdf(G_destination)
 
-            edges.to_postgis(f'classified_edges_withflow_{crit_deviation}', postgis_connection, if_exists="replace")
-
-
-'''
-# ------------------------------------------------------------
-# Sole mode (___main____)
-# ------------------------------------------------------------
-sole_mode = False
-if sole_mode:
-    crit_deviations = [2]
-    execute_flow(city='Rome', crit_deviations=crit_deviations)
-
-# ------------------------------------------------------------
-# Intervention flow
-# ------------------------------------------------------------
-
-plot_intervention_average_flow = False
-if plot_intervention_average_flow:
-
-    # ==============================================================
-    # Simple plot where the sum of the normalized flow of each
-    # edge of an intervention is plotted
-    # ==============================================================
-    result_conatiner = []
-    label = 'flow_ov'
-    length_factor = 1000  # [m] to km
-    for inter_id in inter_ids:
-        intervention_gdf = gdf_global.loc[gdf_global[tag_id] == inter_id]
-        tot_length = sum(intervention_gdf.geometry.length)
-
-        # Normalized average value
-        summed_value = 0
-        for loc in intervention_gdf.index:
-            summed_value += intervention_gdf.loc[loc][label] * intervention_gdf.loc[loc]['geometry'].length
-        averaged_value = round(summed_value / tot_length, 5)
-        result_conatiner.append((inter_id, tot_length / length_factor, averaged_value))
-
-    pd_results = pd.DataFrame(result_conatiner, columns=['id', 'length', 'av_flow_disruption'])
-
-    # Plot scatter plot with intervention length versus average disruption
-    pd_results1 = pd_results.set_index('id', drop=True)
-    pd_results1 = pd_results1.sort_values(by=['length'])
-    pd_results1.plot(x='length', y='av_flow_disruption', kind='scatter')
-    plt.xlabel("length intervention [km]")
-    plt.ylabel("av_flow_disruption [-]")
-    plt.show()
-
-    # Plot line
-    pd_results2 = pd_results.sort_values(by=['av_flow_disruption'])
-    pd_results2.reset_index(drop=True).plot(y='av_flow_disruption', kind='line')
-    plt.xlabel('index column, (not id)')
-    plt.ylabel('av_flow_disruption')
-    plt.show()
-    pd_results3 = pd_results.sort_values(by=['length'])
-    pd_results3.reset_index(drop=True).plot(y='length', kind='scatter')
-    plt.xlabel('index column, (not id)')
-    plt.ylabel('length')
-    plt.show()
-
-# ==============================================================
-# 
-# Calculate flows per iteration
-# 
-# ==============================================================
-def calculate_flow_iterateions():
-    result_conatiner = []
-    for inter_id in inter_ids:
-
-        G_copy = G.copy()
-
-        # ---Get single intervention
-        intervention_gdf = gdf_global.loc[gdf_global[tag_id] == inter_id]
-        G_intervention = hp_rw.gdf_to_nx(intervention_gdf)
-        intervention_gdf.to_file(os.path.join(path_out, "intervention_{}.shp".format(inter_id)))
-
-        # ----Remove intervention from network
-        G_copy.remove_edges_from(G_intervention.edges)
-
-        # -----------------------
-        # ----Run local algorithm
-        # -----------------------
-        nx.set_edge_attributes(G_copy, 0, 'local_av')
-        nx.set_edge_attributes(G_copy, 0, 'local_flow')
-        nx.set_edge_attributes(G_copy, 0, 'local_p')
-        for local_bb in local_bbs:
-            local_bb_obj = hp_osm.BB(ymax=max(local_bb.bounds.maxy), ymin=min(local_bb.bounds.miny), xmax=max(local_bb.bounds.maxx), xmin=min(local_bb.bounds.minx))
-
-            # Get local streets
-            G_local = hp_net.get_intersecting_edges(G_copy, bb=local_bb)
-
-            # Create helper netowrk
-            G_local = flow_algorithm_functions.clean_network_and_assign_capacity(G_local, flow_factor=flow_factor)
-
-            # Calcualte flow
-            G_local, dict_G_super_local = flow_algorithm_functions.create_super_sinks_sources(
-                G_local, local_bb_obj, nr_help_pnts=nr_help_pnts)
-
-            G_local = flow_algorithm_functions.flow_emund(
-                G_local, dict_G_super_local, max_road_cap=max_road_cap)
-
-            # Pass local flow to full network
-            for edge_local in G_local.edges:
-                G_copy.edges[edge_local]['local_av'] = G_base_flow.edges[edge_local]['av_flow']
-                G_copy.edges[edge_local]['local_flow'] = G_local.edges[edge_local]['sum_flow']
-                G_copy.edges[edge_local]['local_p'] = G_local.edges[edge_local]['rel_flow']
-
-        # ------------------------------
-        # ----Run global flow algorithm
-        # ------------------------------
-        G_super, dict_G_super = flow_algorithm_functions.create_super_sinks_sources(
-            G_copy, bb_global, nr_help_pnts=nr_help_pnts)
-
-        G_flow = flow_algorithm_functions.flow_emund(
-            G_super, dict_G_super, max_road_cap=max_road_cap)
-
-        # Write global flow
-        nx.set_edge_attributes(G_flow, 0, 'glob_flow')
-        nx.set_edge_attributes(G_flow, 0, 'glob_p')
-        for edge_local in G_flow.edges:
-            G_flow.edges[edge_local]['glob_flow'] = G_flow.edges[edge_local]['sum_flow']
-            G_flow.edges[edge_local]['glob_p'] = G_flow.edges[edge_local]['rel_flow']
-
-        # Calculate global_local relationship of flow
-        G_flow = hp_net.flow_reg_glob_calc(G_flow, f_local=f_gobal, f_gobal=f_gobal, label='flow_ov')
-        #nodes, edges = hp_rw.nx_to_gdf(G_flow)
-        #edges.to_file("C:/_scrap/G_flow.shp")
-        #nodes, edges = hp_rw.nx_to_gdf(G_global)
-        #edges.to_file("C:/_scrap/G.shp")
-
-        # ---- Calculate flow difference (absoltue and in percent)
-        G_flow, norm_diff, _ = flow_algorithm_functions.calc_flow_difference(
-            G_global, G_flow, attribute='local_p', label='d_localp')
-
-        G_flow, norm_diff, _ = flow_algorithm_functions.calc_flow_difference(
-            G_global, G_flow, attribute='flow_ov', label='d_flowov')
-
-        G_flow, norm_diff, _ = flow_algorithm_functions.calc_flow_difference(
-            G_global, G_flow, attribute='centrality', label='d_central')
+        edges.to_postgis(f'classified_edges_withflow_{crit_deviation}', postgis_connection, if_exists="replace")
 
 
-        nodes, edges = hp_rw.nx_to_gdf(G_flow)
-        edges.to_file(os.path.join(path_out, "edges_G_diff.shp"))
-        prnt(":")
-        result_conatiner.append(["id_{}".format(inter_id), norm_diff])
-
-    fig, ax = plt.subplots(figsize=hp_rw.cm2inch(9, 9))
-    df_raw = pd.DataFrame(result_conatiner, columns=['id_superblock', 'norm_diff'])
-    df_raw = df_raw.set_index('id_superblock')
-    df_raw = df_raw.sort_values(by=['norm_diff'], ascending=False)
-    df_raw.to_csv("C:/_scrap/results.csv")
-    df_raw.plot(y='area', kind='bar', color='grey', ax=ax)
-    plt.show()
-
-
-
-# Run flow algorithm
-G = flow_algorithm_functions.flow_emund(G, dict_G_super, max_road_cap=10)
-
-nodes, edges = hp_rw.nx_to_gdf(G)
-nodes.to_file(os.path.join(path_out, "nodes_flow.shp"))
-edges.to_file(os.path.join(path_out, "edges_flow.shp"))
-'''
