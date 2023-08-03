@@ -59,7 +59,7 @@ def add_job(roi: Region):
             except Exception:
                 return HTTPException(status_code=500, detail="Job not added successfully to database.")
 
-            gdf_street_areas_all, intersect_buildings, all_blocks, blocks_no_street_all = find_superblocks(job_id=job_id, region_of_interest=roi)
+            gdf_street_areas_all, intersect_buildings, all_blocks, blocks_no_street_all = find_superblocks(region_of_interest=roi)
 
             try:
                 intersect_buildings.drop(columns=["created_at"], inplace=True)

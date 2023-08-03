@@ -56,7 +56,7 @@ postgis_connection = create_engine(f"postgresql://{os.getenv('POSTGRES_USER', 'p
                                    f"@{os.getenv('POSTGRES_HOST', 'localhost')}:5432/{os.getenv('POSTGRES_DATABASE', 'postgres')}")
 
 
-def find_superblocks(job_id: int, region_of_interest: Region):
+def find_superblocks(region_of_interest: Region):
 
     city = region_of_interest.name
 
@@ -90,8 +90,8 @@ def find_superblocks(job_id: int, region_of_interest: Region):
                                     f'A.tram, A.bus, A.trolleybus, A."tags.name", '
                                     f'A."GFA_den", A."pop_den", A."tags.bridge", '
                                     f'ST_INTERSECTION(A.geometry, ST_BUFFER(ST_TRANSFORM(B.roi, ST_SRID(A.geometry)), 50)) geometry '
-                                    f'FROM street_network_edges_with_attributes_pop_density as A, jobs as B '
-                                    f'WHERE B.id = {job_id} AND ST_INTERSECTS(A.geometry, ST_BUFFER(ST_TRANSFORM(B.roi, ST_SRID(A.geometry)), 50))',
+                                    f'FROM street_network_edges_with_attributes_pop_density as A'
+                                    f'WHERE ST_INTERSECTS(A.geometry, ST_BUFFER(ST_TRANSFORM(B.roi, ST_SRID(A.geometry)), 50))',
                                     postgis_connection, geom_col="geometry")
 
     if len(gdf_roads) == 0:
@@ -101,18 +101,6 @@ def find_superblocks(job_id: int, region_of_interest: Region):
     if list(gdf_roads.has_z)[0]:
         gdf_roads = hp_net.flatten_geometry(gdf_roads)
 
-    # Make selection of attributes
-    attributes_to_keep_tested = []
-    attributes_to_keep = [
-        'geometry', 'type', 'tags.access', 'tags.highway', 'tags.tunnel', 'tags.maxspeed',
-        'tags.name', 'tram', 'bus', 'trolleybus', 'GFA_den', 'pop_den', 'tags.bridge',
-        'DWV_FZG', 'DWG_PW']
-
-    for attribute in attributes_to_keep:
-        if attribute in gdf_roads.columns.tolist():
-            attributes_to_keep_tested.append(attribute)
-
-    gdf_roads = gdf_roads[attributes_to_keep_tested]
     gdf_roads = hp_net.remove_rings(edges)
 
     #gdf_roads.to_file("/data/tmp/_scrap/first.shp")
@@ -129,8 +117,8 @@ def find_superblocks(job_id: int, region_of_interest: Region):
                     G_roads.edges[edge][tag_to_remodel] = 0
         else:
             gdf_bridges = gpd.read_postgis(
-                'SELECT * FROM bridges as A, jobs as B '
-                f'WHERE B.id = {job_id} AND ST_INTERSECTS(A.geometry, ST_TRANSFORM(B.roi, ST_SRID(A.geometry)))',
+                'SELECT * FROM bridges as A'
+                f'WHERE ST_INTERSECTS(A.geometry, ST_TRANSFORM(B.roi, ST_SRID(A.geometry)))',
                 postgis_connection, geom_col="geometry") # TODO: add where clause + bbox
             if gdf_bridges.shape[0] > 0:
                 #gdf_bridges = gpd.read_file(os.path.join(path_in, "bridges.shp"))
@@ -157,8 +145,8 @@ def find_superblocks(job_id: int, region_of_interest: Region):
 
     # Remove nodes which are on top of a building and degree 1
     buildings = gpd.read_postgis(
-        'SELECT * FROM buildings as A, jobs as B '
-        f'WHERE B.id = {job_id} AND ST_INTERSECTS(A.geometry, ST_TRANSFORM(B.roi, ST_SRID(A.geometry)))',
+        'SELECT * FROM buildings as A'
+        f'WHERE ST_INTERSECTS(A.geometry, ST_TRANSFORM(B.roi, ST_SRID(A.geometry)))',
         postgis_connection, geom_col="geometry")
     #buildings = gpd.read_file(os.path.join(path_in, "osm_buildings.shp"))
     buildings = hp_osm.remove_faulty_polygons(buildings)
@@ -218,24 +206,19 @@ def find_superblocks(job_id: int, region_of_interest: Region):
 
     # Recalculate population density after simplifying network
     pop_pnts = gpd.read_postgis(
-        'SELECT * FROM fb_pop as A, jobs as B '
-        f'WHERE B.id = {job_id} AND ST_INTERSECTS(A.geometry, ST_TRANSFORM(B.roi, ST_SRID(A.geometry)))',
+        'SELECT * FROM fb_pop as A'
+        f'WHERE ST_INTERSECTS(A.geometry, ST_TRANSFORM(B.roi, ST_SRID(A.geometry)))',
         postgis_connection, geom_col="geometry")
     G = hp_net.calc_edge_and_node_pop_density(G, pop_pnts, radius=radius_pop_density, attribute_pop='population', label='pop_den')
 
     # Calculate GFA density based on osm buildings
     buildings_osm = gpd.read_postgis(
-        'SELECT * FROM buildings as A, jobs as B '
-        f'WHERE B.id = {job_id} AND ST_INTERSECTS(A.geometry, ST_TRANSFORM(B.roi, ST_SRID(A.geometry)))',
+        'SELECT * FROM buildings as A'
+        f'WHERE ST_INTERSECTS(A.geometry, ST_TRANSFORM(B.roi, ST_SRID(A.geometry)))',
         postgis_connection, geom_col="geometry")
     G = hp_net.calc_GFA_density(G, buildings_osm, radius=radius_GFA_density, label='GFA_den')
 
     nodes, edges = hp_rw.nx_to_gdf(G)
-    #edges.to_file(os.path.join(path_temp, 'cleaned_edges.shp'))
-    #nodes.to_file(os.path.join(path_temp, 'cleaned_nodes.shp'))
-
-    edges["job_id"] = job_id
-    nodes["job_id"] = job_id
 
     edges.to_postgis("cleaned_edges", postgis_connection, if_exists="append")
 
@@ -309,7 +292,6 @@ def find_superblocks(job_id: int, region_of_interest: Region):
 
 
     #city_blocks.to_file(os.path.join(path_blocks, "gdf_cleaned_city_blocks.shp"))
-    city_blocks["job_id"] = job_id
     city_blocks.to_postgis("gdf_cleaned_city_blocks", postgis_connection, if_exists="append")
 
     # ===================================================================
@@ -427,7 +409,6 @@ def find_superblocks(job_id: int, region_of_interest: Region):
     logging.info("... writing out characterized")
     nodes, edges = hp_rw.nx_to_gdf(G_crit)
     #edges.to_file(path_out_characterized)
-    edges["job_id"] = job_id
     edges.to_postgis(f"characterized_edges_{crit_deviation}", postgis_connection, if_exists="append")
 
     # ---------------------------------------------------
@@ -437,8 +418,7 @@ def find_superblocks(job_id: int, region_of_interest: Region):
     G_street = G_roads
     # Load classification
     superblock_class = gpd.read_postgis(
-        f'SELECT * FROM "characterized_edges_{crit_deviation}" as A '
-        f'WHERE A."job_id" = {job_id}',
+        f'SELECT * FROM "characterized_edges_{crit_deviation}" as A ',
         postgis_connection, geom_col="geometry")
     G_classified = hp_rw.gdf_to_nx(superblock_class)
 
@@ -462,8 +442,6 @@ def find_superblocks(job_id: int, region_of_interest: Region):
         crit_consider_bus=False)
 
     nodes, edges = hp_rw.nx_to_gdf(G_street)
-    #edges.to_file(os.path.join(path_temp_classified, 'classified_edges_{}.shp'.format(crit_deviation)))
-    edges["job_id"] = job_id
     edges.to_postgis(f"classified_edges_{crit_deviation}", postgis_connection, if_exists="append")
 
     # -------------------------------------------------------------
@@ -486,16 +464,14 @@ def find_superblocks(job_id: int, region_of_interest: Region):
     print("... write intervention")
     # ----Load datasets
     city_blocks = gpd.read_postgis(
-        'SELECT * FROM gdf_cleaned_city_blocks as A '
-        f'WHERE A."job_id" = {job_id}',
+        'SELECT * FROM gdf_cleaned_city_blocks as A ',
         postgis_connection, geom_col="geometry")
     gdf_street = gpd.read_postgis(
-        f'SELECT * FROM "characterized_edges_{crit_deviation}" as A '
-        f'WHERE A."job_id" = {job_id}',
+        f'SELECT * FROM "characterized_edges_{crit_deviation}" as A ',
         postgis_connection, geom_col="geometry")
     buildings = gpd.read_postgis(
-        'SELECT * FROM buildings as A, jobs as B '
-        f'WHERE B.id = {job_id} AND ST_INTERSECTS(A.geometry, ST_TRANSFORM(B.roi, ST_SRID(A.geometry)))',
+        'SELECT * FROM buildings as A'
+        f'WHERE ST_INTERSECTS(A.geometry, ST_TRANSFORM(B.roi, ST_SRID(A.geometry)))',
     postgis_connection, geom_col="geometry")
     G_street = hp_rw.gdf_to_nx(gdf_street)
 
@@ -606,12 +582,6 @@ def find_superblocks(job_id: int, region_of_interest: Region):
     print(intersect_buildings.shape)
     print(all_blocks.shape)
     print(blocks_no_street_all.shape)
-
-    # set job id
-    gdf_street_areas_all["job_id"] = job_id
-    intersect_buildings["job_id"] = job_id
-    all_blocks["job_id"] = job_id
-    blocks_no_street_all["job_id"] = job_id
 
     if gdf_street_areas_all.shape[0] > 0:
         #gdf_street_areas_all.to_file(os.path.join(path_scenario_devation, "street_all.shp"))
