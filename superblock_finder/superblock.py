@@ -113,6 +113,7 @@ def find_superblocks(job_id: int, region_of_interest: Region):
             attributes_to_keep_tested.append(attribute)
 
     gdf_roads = gdf_roads[attributes_to_keep_tested]
+    gdf_roads = hp_net.remove_rings(edges)
 
     #gdf_roads.to_file("/data/tmp/_scrap/first.shp")
     G_roads = hp_rw.gdf_to_nx(gdf_roads)
@@ -165,11 +166,6 @@ def find_superblocks(job_id: int, region_of_interest: Region):
 
     # To single segments for cleaning steps
     G_roads = hp_net.G_multilinestring_to_linestring(G_roads, single_segments=True)
-    nodes, edges = hp_rw.nx_to_gdf(G_roads)
-    edges = hp_net.remove_rings(edges)
-
-    # Simplify
-    G_roads = hp_rw.gdf_to_nx(edges)
     G_roads = hp_net.simplify_network(
         G_roads)
     G_roads = hp_net.calculate_node_degree(G_roads)
@@ -177,15 +173,12 @@ def find_superblocks(job_id: int, region_of_interest: Region):
     # Geometric simplification
     G_roads = hp_net.geometric_simplification(G_roads, max_distance=max_distance_node_merging)
     G_roads = hp_net.calculate_node_degree(G_roads)
-    G_roads = hp_net.simplify_network(G_roads)
-
     # Remove self loops
     G_roads.remove_edges_from(nx.selfloop_edges(G_roads))
     G_roads = hp_net.calculate_node_degree(G_roads)
-
-    # Remove small zufahrt
     G_roads = hp_net.remove_zufahrt(G_roads, max_length=max_length_driveway)
     G_roads = hp_net.simplify_network(G_roads)
+
 
     G = G_roads
 
