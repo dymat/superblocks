@@ -82,9 +82,6 @@ def find_superblocks(region_of_interest: Region):
     # ==============================================================================
     # Create Street Graph
     # ==============================================================================
-
-    #gdf_roads = gpd.read_file(os.path.join(path_in, initial_street_name))
-
     gdf_roads = gpd.read_postgis(f'SELECT A.type, A."tags.access", A."tags.highway", '
                                     f'A."tags.tunnel", A."tags.maxspeed", '
                                     f'A.tram, A.bus, A.trolleybus, A."tags.name", '
@@ -103,7 +100,6 @@ def find_superblocks(region_of_interest: Region):
 
     gdf_roads = hp_net.remove_rings(edges)
 
-    #gdf_roads.to_file("/data/tmp/_scrap/first.shp")
     G_roads = hp_rw.gdf_to_nx(gdf_roads)
 
     # ----Add bridges attribute, distance
@@ -121,7 +117,6 @@ def find_superblocks(region_of_interest: Region):
                 f'WHERE ST_INTERSECTS(A.geometry, ST_TRANSFORM(B.roi, ST_SRID(A.geometry)))',
                 postgis_connection, geom_col="geometry") # TODO: add where clause + bbox
             if gdf_bridges.shape[0] > 0:
-                #gdf_bridges = gpd.read_file(os.path.join(path_in, "bridges.shp"))
                 G_roads = hp_net.add_attribute_intersection(G_roads, gdf_bridges, label='tags.man_made', label_new=tag_to_remodel)
                 for edge in G_roads.edges:
                     if G_roads.edges[edge][tag_to_remodel] == 'bridge':
@@ -148,7 +143,6 @@ def find_superblocks(region_of_interest: Region):
         'SELECT * FROM buildings as A'
         f'WHERE ST_INTERSECTS(A.geometry, ST_TRANSFORM(B.roi, ST_SRID(A.geometry)))',
         postgis_connection, geom_col="geometry")
-    #buildings = gpd.read_file(os.path.join(path_in, "osm_buildings.shp"))
     buildings = hp_osm.remove_faulty_polygons(buildings)
     G_roads = hp_net.remove_intersect_building(G_roads, buildings)
 
@@ -291,7 +285,6 @@ def find_superblocks(region_of_interest: Region):
     city_blocks = hp_net.create_city_blocks(gdf_street_raw)
 
 
-    #city_blocks.to_file(os.path.join(path_blocks, "gdf_cleaned_city_blocks.shp"))
     city_blocks.to_postgis("gdf_cleaned_city_blocks", postgis_connection, if_exists="append")
 
     # ===================================================================
@@ -299,8 +292,6 @@ def find_superblocks(region_of_interest: Region):
     # ====================================================================
     G_crit = G.copy()
     G_deg3_4_crit = G_deg3_4.copy()
-
-    #if not os.path.exists(path_out_characterized) or write_anyway:
 
     assumptions = hp_sc.get_superblock_assumptions(crit_deviation) # Get assumptions
 
@@ -408,7 +399,6 @@ def find_superblocks(region_of_interest: Region):
 
     logging.info("... writing out characterized")
     nodes, edges = hp_rw.nx_to_gdf(G_crit)
-    #edges.to_file(path_out_characterized)
     edges.to_postgis(f"characterized_edges_{crit_deviation}", postgis_connection, if_exists="append")
 
     # ---------------------------------------------------
@@ -538,7 +528,6 @@ def find_superblocks(region_of_interest: Region):
                     crit_fullfilled = False
 
                 if not crit_fullfilled or superblock_complete.shape[0] == 0:
-                        #print("Criteria not fulfilled")
                         continue
                 else:
                     print("Write ID: {} {} {}".format(city, inter_id, partfilename))
@@ -584,20 +573,16 @@ def find_superblocks(region_of_interest: Region):
     print(blocks_no_street_all.shape)
 
     if gdf_street_areas_all.shape[0] > 0:
-        #gdf_street_areas_all.to_file(os.path.join(path_scenario_devation, "street_all.shp"))
         gdf_street_areas_all.to_postgis("results_street_all", postgis_connection, if_exists="append")
 
     if intersect_buildings.shape[0] > 0:
-        #intersect_buildings.to_file(os.path.join(path_scenario_devation, "buildings_all.shp"))
         intersect_buildings.to_postgis("results_buildings_all", postgis_connection, if_exists="append")
 
     if all_blocks.shape[0] > 0:
         all_blocks['area'] = all_blocks.geometry.area
-        #all_blocks.to_file(os.path.join(path_scenario_devation, "block_all.shp"))
         all_blocks.to_postgis("results_block_all", postgis_connection, if_exists="append")
 
     if blocks_no_street_all.shape[0] > 0:
-        #blocks_no_street_all.to_file(os.path.join(path_scenario_devation, "negative_all.shp"))
         blocks_no_street_all.to_postgis("results_negative_all", postgis_connection, if_exists="append")
 
 
