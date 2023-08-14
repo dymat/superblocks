@@ -403,7 +403,7 @@ def generate_superblock_scenarios(
     for node_4_4 in G_superblock.nodes:
         if len(all_cycles) == 0:  # All cycles are tested
             continue
-        if G_superblock.nodes[node_4_4]['degree'] >= 4:  # If 4x4 node, perform analysis
+        if "degree" in G_superblock.nodes[node_4_4] and G_superblock.nodes[node_4_4]['degree'] >= 4:  # If 4x4 node, perform analysis
 
             # ---Find smallest cycle which contains cycle edge
             cylce_cnt = 0

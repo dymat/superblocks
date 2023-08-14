@@ -79,6 +79,10 @@ def find_superblocks(region_of_interest: Region):
     max_length_driveway = 15            # [m]
     max_distance_node_merging = 15      # [m]
 
+    coords = region_of_interest.coords + [region_of_interest.coords[0]]
+    polygon = "'POLYGON((" + ",".join([f"{point.lng} {point.lat}" for point in coords]) + "))'"
+    print(polygon)
+
     # ==============================================================================
     # Create Street Graph
     # ==============================================================================
@@ -86,9 +90,9 @@ def find_superblocks(region_of_interest: Region):
                                     f'A."tags.tunnel", A."tags.maxspeed", '
                                     f'A.tram, A.bus, A.trolleybus, A."tags.name", '
                                     f'A."GFA_den", A."pop_den", A."tags.bridge", '
-                                    f'ST_INTERSECTION(A.geometry, ST_BUFFER(ST_TRANSFORM(B.roi, ST_SRID(A.geometry)), 50)) geometry '
-                                    f'FROM street_network_edges_with_attributes_pop_density as A'
-                                    f'WHERE ST_INTERSECTS(A.geometry, ST_BUFFER(ST_TRANSFORM(B.roi, ST_SRID(A.geometry)), 50))',
+                                    f'ST_INTERSECTION(A.geometry, ST_BUFFER(ST_TRANSFORM(ST_GeomFromText({polygon}, 4326), ST_SRID(A.geometry)), 50)) geometry '
+                                    f'FROM street_network_edges_with_attributes_pop_density as A '
+                                    f'WHERE ST_INTERSECTS(A.geometry, ST_BUFFER(ST_TRANSFORM(ST_GeomFromText({polygon}, 4326), ST_SRID(A.geometry)), 50))',
                                     postgis_connection, geom_col="geometry")
 
     if len(gdf_roads) == 0:
@@ -98,7 +102,7 @@ def find_superblocks(region_of_interest: Region):
     if list(gdf_roads.has_z)[0]:
         gdf_roads = hp_net.flatten_geometry(gdf_roads)
 
-    gdf_roads = hp_net.remove_rings(edges)
+    gdf_roads = hp_net.remove_rings(gdf_roads)
 
     G_roads = hp_rw.gdf_to_nx(gdf_roads)
 
@@ -113,8 +117,8 @@ def find_superblocks(region_of_interest: Region):
                     G_roads.edges[edge][tag_to_remodel] = 0
         else:
             gdf_bridges = gpd.read_postgis(
-                'SELECT * FROM bridges as A'
-                f'WHERE ST_INTERSECTS(A.geometry, ST_TRANSFORM(B.roi, ST_SRID(A.geometry)))',
+                'SELECT * FROM bridges as A '
+                f'WHERE ST_INTERSECTS(A.geometry, ST_TRANSFORM(ST_GeomFromText({polygon}, 4326), ST_SRID(A.geometry)))',
                 postgis_connection, geom_col="geometry") # TODO: add where clause + bbox
             if gdf_bridges.shape[0] > 0:
                 G_roads = hp_net.add_attribute_intersection(G_roads, gdf_bridges, label='tags.man_made', label_new=tag_to_remodel)
@@ -140,8 +144,8 @@ def find_superblocks(region_of_interest: Region):
 
     # Remove nodes which are on top of a building and degree 1
     buildings = gpd.read_postgis(
-        'SELECT * FROM buildings as A'
-        f'WHERE ST_INTERSECTS(A.geometry, ST_TRANSFORM(B.roi, ST_SRID(A.geometry)))',
+        'SELECT * FROM buildings as A '
+        f'WHERE ST_INTERSECTS(A.geometry, ST_TRANSFORM(ST_GeomFromText({polygon}, 4326), ST_SRID(A.geometry)))',
         postgis_connection, geom_col="geometry")
     buildings = hp_osm.remove_faulty_polygons(buildings)
     G_roads = hp_net.remove_intersect_building(G_roads, buildings)
@@ -200,15 +204,15 @@ def find_superblocks(region_of_interest: Region):
 
     # Recalculate population density after simplifying network
     pop_pnts = gpd.read_postgis(
-        'SELECT * FROM fb_pop as A'
-        f'WHERE ST_INTERSECTS(A.geometry, ST_TRANSFORM(B.roi, ST_SRID(A.geometry)))',
+        'SELECT * FROM fb_pop as A '
+        f'WHERE ST_INTERSECTS(A.geometry, ST_TRANSFORM(ST_GeomFromText({polygon}, 4326), ST_SRID(A.geometry)))',
         postgis_connection, geom_col="geometry")
     G = hp_net.calc_edge_and_node_pop_density(G, pop_pnts, radius=radius_pop_density, attribute_pop='population', label='pop_den')
 
     # Calculate GFA density based on osm buildings
     buildings_osm = gpd.read_postgis(
-        'SELECT * FROM buildings as A'
-        f'WHERE ST_INTERSECTS(A.geometry, ST_TRANSFORM(B.roi, ST_SRID(A.geometry)))',
+        'SELECT * FROM buildings as A '
+        f'WHERE ST_INTERSECTS(A.geometry, ST_TRANSFORM(ST_GeomFromText({polygon}, 4326), ST_SRID(A.geometry)))',
         postgis_connection, geom_col="geometry")
     G = hp_net.calc_GFA_density(G, buildings_osm, radius=radius_GFA_density, label='GFA_den')
 
@@ -460,8 +464,8 @@ def find_superblocks(region_of_interest: Region):
         f'SELECT * FROM "characterized_edges_{crit_deviation}" as A ',
         postgis_connection, geom_col="geometry")
     buildings = gpd.read_postgis(
-        'SELECT * FROM buildings as A'
-        f'WHERE ST_INTERSECTS(A.geometry, ST_TRANSFORM(B.roi, ST_SRID(A.geometry)))',
+        'SELECT * FROM buildings as A '
+        f'WHERE ST_INTERSECTS(A.geometry, ST_TRANSFORM(ST_GeomFromText({polygon}, 4326), ST_SRID(A.geometry)))',
     postgis_connection, geom_col="geometry")
     G_street = hp_rw.gdf_to_nx(gdf_street)
 
